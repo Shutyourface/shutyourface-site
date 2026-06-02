@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SYF — Curation HQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111;
+      --surface2: #1a1a1a;
+      --border: #222;
+      --border2: #2e2e2e;
+      --accent: #cc0000;
+      --accent2: #ff6600;
+      --green: #00cc44;
+      --yellow: #ffcc00;
+      --text: #e0e0e0;
+      --muted: #666;
+      --muted2: #444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Oswald', sans-serif; font-size: 14px; min-height: 100vh; }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: #000;
+      border-bottom: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 52px;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+    .topbar-logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; }
+    .topbar-logo em { color: var(--accent); font-style: normal; }
+    .topbar-sub { font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .btn {
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 7px 16px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #ff0000; }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
+    .btn-secondary:hover { border-color: var(--accent); color: #fff; }
+    .btn-green { background: var(--green); color: #000; }
+    .btn-green:hover { background: #00ff55; }
+    .btn-sm { padding: 4px 10px; font-size: 10px; }
+
+    /* ── CONFIG PANEL ── */
+    .config-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .config-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+    .config-input {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 6px 10px;
+      width: 220px;
+    }
+    .config-input:focus { outline: none; border-color: var(--accent); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .dot-red { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .dot-yellow { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+
+    /* ── MAIN LAYOUT ── */
+    .main { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 100px); }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 16px 0;
+      overflow-y: auto;
+      position: sticky;
+      top: 100px;
+      height: calc(100vh - 100px);
+    }
+    .sidebar-section { padding: 0 16px 16px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+    .sidebar-title { font-size: 10px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
+    .source-tag {
+      display: inline-block;
+      background: none;
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 3px 8px;
+      margin: 3px 3px 3px 0;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .source-tag:hover, .source-tag.active { border-color: var(--accent); color: #fff; background: rgba(204,0,0,0.1); }
+    .filter-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      border-left: 2px solid transparent;
+      color: var(--muted);
+      font-family: 'Oswald', sans-serif;
+      font-size: 13px;
+      letter-spacing: 1px;
+      padding: 7px 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover, .filter-btn.active { color: #fff; border-left-color: var(--accent); background: rgba(204,0,0,0.05); }
+    .filter-count { float: right; font-size: 10px; color: var(--muted2); background: var(--surface2); padding: 1px 6px; }
+    .trend-input {
+      width: 100%;
+      min-height: 74px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      letter-spacing: 1px;
+      padding: 8px;
+      resize: vertical;
+    }
+    .trend-input:focus { outline: none; border-color: var(--accent); }
+    .trend-match {
+      display: inline-block;
+      margin-top: 6px;
+      color: var(--yellow);
+      border: 1px solid rgba(255,204,0,0.4);
+      padding: 2px 6px;
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+
+    /* ── STORY FEED ── */
+    .feed { padding: 16px 24px; overflow-y: auto; }
+    .feed-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .feed-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; }
+    .feed-meta { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+
+    /* ── STORY CARD ── */
+    .story-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+      padding: 14px 16px;
+      transition: border-color 0.15s;
+      position: relative;
+    }
+    .story-card:hover { border-color: var(--border2); }
+    .story-card.published { border-left: 3px solid var(--green); opacity: 0.6; }
+    .story-card.selected { border-color: var(--accent); background: rgba(204,0,0,0.05); }
+
+    .card-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+    .story-badge {
+      flex-shrink: 0;
+      width: 92px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border2);
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      line-height: 1.15;
+      text-align: center;
+      padding: 6px;
+      text-transform: uppercase;
+    }
+    .story-badge.priority-high { border-color: var(--accent); background: rgba(204,0,0,0.1); color: var(--accent); }
+    .story-badge.priority-mid { border-color: var(--accent2); background: rgba(255,102,0,0.08); color: var(--accent2); }
+    .story-badge.priority-low { border-color: var(--border2); color: var(--muted); }
+
+    .card-content { flex: 1; }
+    .card-source {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .card-headline {
+      font-family: 'Oswald', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .card-original {
+      font-size: 11px;
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+    .card-meta { font-size: 10px; color: var(--muted2); letter-spacing: 1px; }
+
+    .card-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+
+    .placement-btn {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 5px 12px;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-transform: uppercase;
+    }
+    .placement-btn:hover { color: #fff; border-color: #fff; }
+    .placement-btn.hero { border-color: var(--yellow); color: var(--yellow); }
+    .placement-btn.hero:hover { background: var(--yellow); color: #000; }
+    .placement-btn.left { border-color: #4488ff; color: #4488ff; }
+    .placement-btn.left:hover { background: #4488ff; color: #fff; }
+    .placement-btn.right { border-color: #aa44ff; color: #aa44ff; }
+    .placement-btn.right:hover { background: #aa44ff; color: #fff; }
+    .placement-btn.chaos { border-color: var(--accent2); color: var(--accent2); }
+    .placement-btn.chaos:hover { background: var(--accent2); color: #000; }
+
+    .rewrite-btn {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 5px 12px;
+      border: 1px solid var(--green);
+      background: transparent;
+      color: var(--green);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-transform: uppercase;
+      margin-left: auto;
+    }
+    .rewrite-btn:hover { background: var(--green); color: #000; }
+    .rewrite-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── CHAOS MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      padding: 28px;
+      width: 420px;
+      max-width: 90vw;
+    }
+    .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; margin-bottom: 6px; }
+    .modal-sub { font-size: 11px; color: var(--muted); letter-spacing: 1px; margin-bottom: 20px; }
+    .chaos-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .chaos-col-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 2px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .chaos-col-btn:hover { border-color: var(--accent2); color: var(--accent2); background: rgba(255,102,0,0.05); }
+    .modal-cancel { background: none; border: 1px solid var(--border2); color: var(--muted); font-family: 'Oswald', sans-serif; font-size: 11px; letter-spacing: 2px; padding: 8px 16px; cursor: pointer; width: 100%; text-transform: uppercase; }
+    .modal-cancel:hover { border-color: #fff; color: #fff; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--green);
+      color: #000;
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 12px 20px;
+      z-index: 999;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s;
+      text-transform: uppercase;
+    }
+    .toast.error { background: var(--accent); color: #fff; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── PUBLISHED QUEUE ── */
+    .queue-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #000;
+      border-top: 2px solid var(--border2);
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 100;
+      font-size: 11px;
+    }
+    .queue-label { letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+    .queue-item {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      padding: 3px 10px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--text);
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .queue-item .q-placement { color: var(--accent); margin-right: 6px; }
+
+    /* ── LOADING ── */
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .empty-state h2 { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; margin-bottom: 8px; color: var(--border2); }
+
+    .manager-panel {
+      display: none;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+    }
+    .manager-panel.open { display: block; }
+    .manager-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .manager-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; color: var(--text); }
+    .story-manager-row {
+      display: grid;
+      grid-template-columns: 2fr 120px 1.5fr 120px 180px;
+      gap: 8px;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      padding: 10px 0;
+    }
+    .manager-input, .manager-select {
+      width: 100%;
+      background: #050505;
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      padding: 7px 8px;
+    }
+    .manager-actions { display: flex; gap: 6px; grid-column: 1 / -1; justify-content: flex-end; }
+    .manager-delete { border-color: var(--accent) !important; color: var(--accent) !important; }
+    .manager-empty { color: var(--muted); font-size: 12px; letter-spacing: 1px; padding: 18px 0; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .main { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; }
+      .config-input { width: 160px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <div class="topbar-logo">SHUT YOUR <em>FACE</em> — <span style="font-size:18px;color:var(--muted)">CURATION HQ</span></div>
+  </div>
+  <div class="topbar-right">
+    <span id="sanity-status"><span class="status-dot dot-yellow"></span> NOT CONFIGURED</span>
+    <button class="btn btn-secondary" onclick="refreshFeed()">⟳ REFRESH FEED</button>
+    <button class="btn btn-primary" onclick="document.getElementById('config-panel').scrollIntoView()">⚙ CONFIG</button>
+  </div>
+</div>
+
+<!-- CONFIG BAR -->
+<div class="config-bar" id="config-panel">
+  <span class="config-label">Sanity Project ID</span>
+  <input class="config-input" id="projectId" placeholder="e.g. faufs903" />
+  <span class="config-label">API Token</span>
+  <input class="config-input" id="apiToken" type="password" placeholder="sk..." />
+  <span class="config-label">Claude API Key</span>
+  <input class="config-input" id="claudeKey" type="password" placeholder="sk-ant-..." />
+  <button class="btn btn-primary" onclick="saveConfig()">SAVE & CONNECT</button>
+  <button class="btn btn-secondary" onclick="toggleStoryManager()">EDIT PUBLISHED STORIES</button>
+  <span id="config-status" style="font-size:11px;color:var(--muted);letter-spacing:1px;"></span>
+</div>
+
+<div class="manager-panel" id="story-manager">
+  <div class="manager-header">
+    <div>
+      <div class="manager-title">PUBLISHED STORIES</div>
+      <div class="feed-meta">Edit headlines, placement, image URL, visibility, or delete stories from Sanity.</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-secondary" onclick="loadPublishedStories()">REFRESH LIST</button>
+      <button class="btn btn-secondary" onclick="toggleStoryManager()">CLOSE</button>
+    </div>
+  </div>
+  <div id="published-story-list" class="manager-empty">Click refresh list to load previous stories.</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Filter by Category</div>
+      <button class="filter-btn category-filter active" onclick="filterCategory('all', this)">ALL STORIES <span class="filter-count" id="count-all">0</span></button>
+      <button class="filter-btn category-filter" onclick="filterCategory('news', this)">HARD NEWS <span class="filter-count" id="count-news">0</span></button>
+      <button class="filter-btn category-filter" onclick="filterCategory('politics', this)">POLITICS <span class="filter-count" id="count-politics">0</span></button>
+      <button class="filter-btn category-filter" onclick="filterCategory('business', this)">BUSINESS <span class="filter-count" id="count-business">0</span></button>
+      <button class="filter-btn category-filter" onclick="filterCategory('tech', this)">TECH <span class="filter-count" id="count-tech">0</span></button>
+      <button class="filter-btn category-filter" onclick="filterCategory('entertainment', this)">ENTERTAINMENT <span class="filter-count" id="count-entertainment">0</span></button>
+      <button class="filter-btn category-filter" onclick="filterCategory('weird', this)">WEIRD & VIRAL <span class="filter-count" id="count-weird">0</span></button>
+      <button class="filter-btn category-filter" onclick="filterCategory('science', this)">SCIENCE <span class="filter-count" id="count-science">0</span></button>
+      <button class="filter-btn category-filter" onclick="filterCategory('sports', this)">SPORTS <span class="filter-count" id="count-sports">0</span></button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Filter by Badge</div>
+      <button class="filter-btn badge-filter" onclick="filterBadge('best', this)">⭐ BEST PICKS</button>
+      <button class="filter-btn badge-filter active" onclick="filterBadge('all', this)">ALL BADGES</button>
+      <button class="filter-btn badge-filter" onclick="filterBadge('wild', this)">🔥 WILD</button>
+      <button class="filter-btn badge-filter" onclick="filterBadge('breaking', this)">💥 BREAKING</button>
+      <button class="filter-btn badge-filter" onclick="filterBadge('outrage', this)">😡 OUTRAGE</button>
+      <button class="filter-btn badge-filter" onclick="filterBadge('america', this)">🇺🇸 ONLY IN AMERICA</button>
+      <button class="filter-btn badge-filter" onclick="filterBadge('world', this)">🌍 WORLD</button>
+      <button class="filter-btn badge-filter" onclick="filterBadge('money', this)">💰 MONEY</button>
+      <button class="filter-btn badge-filter" onclick="filterBadge('health', this)">☠️ HEALTH SCARE</button>
+      <button class="filter-btn badge-filter" onclick="filterBadge('entertainment', this)">🎬 ENTERTAINMENT</button>
+      <button class="filter-btn badge-filter" onclick="filterBadge('crime', this)">⚖️ CRIME</button>
+      <button class="filter-btn badge-filter" onclick="filterBadge('tech', this)">🤖 TECH</button>
+      <button class="filter-btn badge-filter" onclick="filterBadge('sports', this)">🏈 SPORTS</button>
+      <button class="filter-btn badge-filter" onclick="filterBadge('wtf', this)">😂 WTF</button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Find Trend Stories</div>
+      <textarea class="trend-input" id="trendTerms" placeholder="Paste trend terms here — e.g. Diddy, NBA Finals, OpenAI"></textarea>
+      <button class="btn btn-primary" onclick="findTrendStories()" style="width:100%;margin-top:8px;">FIND RELATED STORIES</button>
+      <button class="btn btn-secondary" onclick="clearTrendSearch()" style="width:100%;margin-top:8px;">CLEAR TREND SEARCH</button>
+      <div style="font-size:10px;color:var(--muted);line-height:1.5;margin-top:8px;">Paste a trend, then pull up matching stories instantly.</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Today's Queue</div>
+      <div id="queue-summary" style="font-size:11px;color:var(--muted);line-height:2;">
+        <div>HERO: <span id="q-hero" style="color:#fff">—</span></div>
+        <div>LEFT: <span id="q-left" style="color:#fff">0/6</span></div>
+        <div>RIGHT: <span id="q-right" style="color:#fff">0/6</span></div>
+        <div>CHAOS: <span id="q-chaos" style="color:#fff">0</span></div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Sources Active</div>
+      <div id="source-list" style="line-height:1.8;font-size:11px;color:var(--muted);">Loading...</div>
+    </div>
+  </div>
+
+  <!-- FEED -->
+  <div class="feed">
+    <div class="feed-header">
+      <div>
+        <div class="feed-title">TODAY'S STORIES</div>
+        <div class="feed-meta" id="feed-meta">Pull stories to get started</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary" onclick="sortBy('priority')">SORT: BEST</button>
+        <button class="btn btn-secondary" onclick="sortBy('time')">SORT: NEWEST</button>
+      </div>
+    </div>
+
+    <div id="story-feed">
+      <div class="empty-state">
+        <h2>NO STORIES YET</h2>
+        <p style="font-size:12px;letter-spacing:1px;">Enter your config above and hit REFRESH FEED</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ──
+let config = {
+  projectId: localStorage.getItem('syf_projectId') || '',
+  apiToken: localStorage.getItem('syf_apiToken') || '',
+  claudeKey: localStorage.getItem('syf_claudeKey') || '',
+  dataset: 'production'
+};
+
+// ── STATE ──
+let allStories = [];
+let lastRefreshReport = { loaded: 0, failedSources: [], categoryCounts: {} };
+let trendTerms = parseTrendTerms(localStorage.getItem('syf_trendTerms') || '');
+let publishedToday = { hero: null, left: 0, right: 0, chaos: 0 };
+let pendingChaosStory = null;
+let currentFilter = { category: 'all', badge: 'all', trend: false, source: 'all' };
+let currentSort = 'priority';
+
+// ── RSS SOURCES ──
+const RSS_SOURCES = [
+  // Hard News
+  { name: 'AP', url: 'https://feeds.apnews.com/rss/apf-topnews', category: 'news' },
+  { name: 'Reuters', url: 'https://feeds.reuters.com/reuters/topNews', category: 'news' },
+  { name: 'BBC', url: 'http://feeds.bbci.co.uk/news/rss.xml', category: 'news' },
+  { name: 'NPR', url: 'https://feeds.npr.org/1001/rss.xml', category: 'news' },
+  { name: 'Axios', url: 'https://api.axios.com/feed/', category: 'news' },
+  // Politics
+  { name: 'The Hill', url: 'https://thehill.com/feed/', category: 'politics' },
+  { name: 'Politico', url: 'https://rss.politico.com/politics-news.xml', category: 'politics' },
+  { name: 'Fox News', url: 'https://feeds.foxnews.com/foxnews/politics', category: 'politics' },
+  { name: 'NY Post', url: 'https://nypost.com/feed/', category: 'politics' },
+  { name: 'Guardian', url: 'https://www.theguardian.com/us-news/rss', category: 'politics' },
+  { name: 'Drudge', url: 'https://feeds.feedburner.com/DrudgeReportFeed', category: 'politics' },
+  // Business
+  { name: 'WSJ', url: 'https://feeds.a.dj.com/rss/RSSWorldNews.xml', category: 'business' },
+  { name: 'Bloomberg', url: 'https://feeds.bloomberg.com/markets/news.rss', category: 'business' },
+  { name: 'CNBC', url: 'https://www.cnbc.com/id/100003114/device/rss/rss.html', category: 'business' },
+  // Tech
+  { name: 'The Verge', url: 'https://www.theverge.com/rss/index.xml', category: 'tech' },
+  { name: 'Wired', url: 'https://www.wired.com/feed/rss', category: 'tech' },
+  { name: 'Ars Technica', url: 'http://feeds.arstechnica.com/arstechnica/index', category: 'tech' },
+  // Entertainment
+  { name: 'Deadline', url: 'https://deadline.com/feed/', category: 'entertainment' },
+  { name: 'Variety', url: 'https://variety.com/feed/', category: 'entertainment' },
+  { name: 'TMZ', url: 'https://www.tmz.com/rss.xml', category: 'entertainment' },
+  { name: 'Rolling Stone', url: 'https://www.rollingstone.com/feed/', category: 'entertainment' },
+  // Weird & Viral
+  { name: 'Oddity Central', url: 'https://www.odditycentral.com/feed', category: 'weird' },
+  { name: 'Boing Boing', url: 'https://boingboing.net/feed', category: 'weird' },
+  { name: 'UPI Odd', url: 'https://www.upi.com/RSS/Odd_News/', category: 'weird' },
+  { name: 'Fark', url: 'https://www.fark.com/fark.rss', category: 'weird' },
+  // Science
+  { name: 'IFLScience', url: 'https://www.iflscience.com/rss.xml', category: 'science' },
+  { name: 'Pop Science', url: 'https://www.popsci.com/feed/', category: 'science' },
+  { name: 'Smithsonian', url: 'https://www.smithsonianmag.com/rss/latest_articles/', category: 'science' },
+  // Sports
+  { name: 'ESPN', url: 'https://www.espn.com/espn/rss/news', category: 'sports' },
+  { name: 'Bleacher Report', url: 'https://bleacherreport.com/articles/feed', category: 'sports' },
+];
+
+const SOURCE_WEIGHTS = {
+  AP: 1.4,
+  Reuters: 1.4,
+  BBC: 1.25,
+  NPR: 1.15,
+  Axios: 1.15,
+  'The Hill': 1.15,
+  Politico: 1.25,
+  'Fox News': 1.2,
+  'NY Post': 1.05,
+  Guardian: 1.1,
+  Drudge: 1.25,
+  WSJ: 1.3,
+  Bloomberg: 1.25,
+  CNBC: 1.15,
+  'The Verge': 1.1,
+  Wired: 1.05,
+  'Ars Technica': 1.05,
+  Deadline: 1.2,
+  Variety: 1.15,
+  TMZ: 1.25,
+  'Rolling Stone': 1.05,
+  ESPN: 1.25,
+  'Bleacher Report': 1.05,
+};
+
+const CATEGORY_BOOSTS = {
+  news: 0.5,
+  politics: 0.5,
+  business: 0.3,
+  tech: 0.25,
+  entertainment: 0.75,
+  weird: 0.75,
+  science: 0.4,
+  sports: 0.75,
+};
+
+const HEAT_TERMS = new Set(['breaking','urgent','exclusive','live','resigns','resign','dies','dead','death','arrested','charged','convicted','guilty','lawsuit','ban','banned','crisis','chaos','shock','shocking','bombshell','explodes','collapse','war','attack','shooting','scandal','probe','investigation','warning','recall','viral','reveals','exposed']);
+
+// ── INIT ──
+window.onload = () => {
+  if (config.projectId) document.getElementById('projectId').value = config.projectId;
+  if (config.apiToken) document.getElementById('apiToken').value = config.apiToken;
+  if (config.claudeKey) document.getElementById('claudeKey').value = config.claudeKey;
+  document.getElementById('trendTerms').value = localStorage.getItem('syf_trendTerms') || '';
+  if (config.projectId && config.apiToken) updateSanityStatus(true);
+  renderSourceList();
+};
+
+function saveConfig() {
+  config.projectId = document.getElementById('projectId').value.trim();
+  config.apiToken = document.getElementById('apiToken').value.trim();
+  config.claudeKey = document.getElementById('claudeKey').value.trim();
+  localStorage.setItem('syf_projectId', config.projectId);
+  localStorage.setItem('syf_apiToken', config.apiToken);
+  localStorage.setItem('syf_claudeKey', config.claudeKey);
+  updateSanityStatus(true);
+  document.getElementById('config-status').textContent = '✓ SAVED';
+  setTimeout(() => document.getElementById('config-status').textContent = '', 2000);
+}
+
+function updateSanityStatus(connected) {
+  const el = document.getElementById('sanity-status');
+  el.innerHTML = connected
+    ? `<span class="status-dot dot-green"></span> SANITY CONNECTED`
+    : `<span class="status-dot dot-red"></span> NOT CONNECTED`;
+}
+
+function findTrendStories() {
+  const rawTerms = document.getElementById('trendTerms').value;
+  localStorage.setItem('syf_trendTerms', rawTerms);
+  trendTerms = parseTrendTerms(rawTerms);
+  currentFilter.trend = trendTerms.length > 0;
+  if (allStories.length) {
+    allStories = deduplicateAndScore(allStories);
+  }
+  renderFeed();
+  showToast(currentFilter.trend ? `SHOWING STORIES RELATED TO: ${trendTerms.join(', ').toUpperCase()}` : 'ADD A TREND TERM FIRST', !currentFilter.trend);
+}
+
+function clearTrendSearch() {
+  document.getElementById('trendTerms').value = '';
+  localStorage.removeItem('syf_trendTerms');
+  trendTerms = [];
+  currentFilter.trend = false;
+  if (allStories.length) {
+    allStories = deduplicateAndScore(allStories);
+  }
+  renderFeed();
+  showToast('TREND SEARCH CLEARED', false);
+}
+
+function parseTrendTerms(value) {
+  return value
+    .split(/[\n,]+/)
+    .map(term => term.trim().replace(/^#/, '').toLowerCase())
+    .filter(term => term.length >= 3);
+}
+
+function renderSourceList() {
+  const cats = {};
+  RSS_SOURCES.forEach(s => {
+    if (!cats[s.category]) cats[s.category] = [];
+    cats[s.category].push(s.name);
+  });
+  let html = '';
+  Object.entries(cats).forEach(([cat, names]) => {
+    html += `<div style="color:var(--accent);font-size:9px;letter-spacing:2px;margin-top:8px;">${cat.toUpperCase()}</div>`;
+    html += names.map(n => `<button class="source-tag source-filter" onclick="filterSource('${n.replace(/'/g, "\\'")}', this)">${n}</button>`).join('');
+  });
+  if (lastRefreshReport.failedSources.length) {
+    html += `<div style="color:var(--accent2);font-size:9px;letter-spacing:2px;margin-top:12px;">FAILED THIS REFRESH</div>`;
+    html += lastRefreshReport.failedSources.map(n => `<div style="color:var(--muted);">${n}</div>`).join('');
+  }
+  document.getElementById('source-list').innerHTML = html;
+}
+
+// ── RSS FETCH ──
+async function fetchRSS(source) {
+  try {
+    const res = await fetch(`/api/rss?url=${encodeURIComponent(source.url)}`);
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || `HTTP ${res.status}`);
+    }
+    const contents = await res.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(contents, 'text/xml');
+    const items = xml.querySelectorAll('item, entry');
+    const stories = [];
+    items.forEach((item, i) => {
+      if (i >= 8) return; // max 8 per source
+      const title = item.querySelector('title')?.textContent?.trim() || '';
+      const link = item.querySelector('link')?.getAttribute('href') || item.querySelector('link')?.textContent?.trim() || '';
+      const pubDate = item.querySelector('pubDate, published, updated')?.textContent?.trim() || '';
+      if (title && link) {
+        stories.push({
+          id: '',
+          originalHeadline: title,
+          headline: title,
+          url: link,
+          source: source.name,
+          category: source.category,
+          pubDate: pubDate ? new Date(pubDate) : new Date(),
+          priorityScore: 1,
+          rewritten: false,
+          published: false,
+        });
+      }
+    });
+    return { source, stories, error: null };
+  } catch (e) {
+    console.warn(`Failed to fetch ${source.name}:`, e);
+    return { source, stories: [], error: e.message || 'Failed to fetch' };
+  }
+}
+
+async function refreshFeed() {
+  document.getElementById('story-feed').innerHTML = `
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <div style="font-size:12px;letter-spacing:2px;">PULLING FROM ${RSS_SOURCES.length} SOURCES...</div>
+    </div>`;
+
+  // Fetch all sources in parallel
+  const results = await Promise.all(RSS_SOURCES.map(fetchRSS));
+  let stories = results.flatMap(r => r.stories);
+  const failedSources = results.filter(r => r.error).map(r => `${r.source.name}: ${r.error}`);
+
+  // Deduplicate + badge classification
+  stories = deduplicateAndScore(stories);
+
+  // Sort
+  stories.sort((a, b) => b.priorityScore - a.priorityScore);
+  stories.forEach((story, index) => {
+    story.id = makeStoryId(story.url, index);
+  });
+
+  allStories = stories;
+  lastRefreshReport = {
+    loaded: stories.length,
+    failedSources,
+    categoryCounts: getCategoryCounts(stories),
+  };
+  try { sessionStorage.setItem('syf_stories', JSON.stringify(stories)); } catch(e) {}
+  updateCounts();
+  renderSourceList();
+  renderFeed();
+
+  const now = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('feed-meta').textContent = buildRefreshSummary(now);
+  showToast(`${stories.length} STORIES LOADED · ${failedSources.length} SOURCES FAILED`, failedSources.length > 0);
+}
+
+function getCategoryCounts(stories) {
+  return stories.reduce((counts, story) => {
+    counts[story.category] = (counts[story.category] || 0) + 1;
+    return counts;
+  }, {});
+}
+
+function buildRefreshSummary(time) {
+  const categories = ['news','politics','business','tech','entertainment','weird','science','sports'];
+  const counts = categories.map(cat => `${cat}: ${lastRefreshReport.categoryCounts[cat] || 0}`).join(' · ');
+  const failed = lastRefreshReport.failedSources.length ? ` · failed: ${lastRefreshReport.failedSources.length}` : '';
+  return `${lastRefreshReport.loaded} stories — ${counts}${failed} — updated ${time}`;
+}
+
+function deduplicateAndScore(stories) {
+  // First deduplicate by URL
+  const seen = new Set();
+  stories = stories.filter(s => {
+    if (!s.url || seen.has(s.url)) return false;
+    seen.add(s.url);
+    return true;
+  });
+
+  stories.forEach(s => {
+    s.priorityScore = 1;
+    s.sources = [s.source];
+  });
+
+  const keywordMap = {};
+  stories.forEach(story => {
+    const keywords = extractKeywords(story.originalHeadline);
+    story.keywords = keywords;
+    keywords.forEach(keyword => {
+      if (!keywordMap[keyword]) keywordMap[keyword] = [];
+      keywordMap[keyword].push(story);
+    });
+  });
+
+  stories.forEach(story => {
+    let bestGroup = [story];
+    story.keywords.forEach(keyword => {
+      const group = keywordMap[keyword] || [];
+      if (group.length > bestGroup.length) bestGroup = group;
+    });
+    story.sources = [...new Set(bestGroup.map(s => s.source))];
+    story.trendMatches = getTrendMatches(story.originalHeadline);
+    story.badge = classifyStoryBadge(story);
+    story.priorityScore = calculatePriorityScore(story, bestGroup);
+  });
+
+  return stories;
+}
+
+function extractKeywords(headline) {
+  if (!headline) return [];
+  const stopWords = new Set(['the','a','an','in','on','at','to','for','of','and','or','is','are','was','were','with','that','this','it','he','she','they','we','i','as','by','from','be','been','being','have','has','had','do','does','did','will','would','could','should','may','might','not','no','but','if','its','his','her','their','our','your','my','up','out','about','after','before','into','over','under','new','says','said']);
+  return [...new Set(headline.toLowerCase()
+    .replace(/[^a-z0-9 ]/g, '')
+    .split(' ')
+    .filter(w => w.length > 4 && !stopWords.has(w))
+    .slice(0, 8))];
+}
+
+function classifyStoryBadge(story) {
+  const text = `${story.originalHeadline} ${story.category} ${story.source}`.toLowerCase();
+  const rules = [
+    { key: 'wild', label: '🔥 WILD', priority: 'high', terms: ['weird','bizarre','shocking','unbelievable','mystery','alien','ufo','naked','insane','crazy','strange','odd','wild','miracle','monster'] },
+    { key: 'breaking', label: '💥 BREAKING', priority: 'high', terms: ['breaking','urgent','live','just in','developing','alert','explosion','attack','war','dies','dead','resigns','collapse','major','emergency'] },
+    { key: 'outrage', label: '😡 OUTRAGE', priority: 'high', terms: ['outrage','furious','anger','angry','backlash','slammed','blasted','protest','scandal','controversy','rage','betrayal'] },
+    { key: 'america', label: '🇺🇸 ONLY IN AMERICA', priority: 'mid', terms: ['florida','texas','america','american','usa','u.s.','us ','congress','white house','supreme court','border','guns','walmart','mcdonald'] },
+    { key: 'world', label: '🌍 WORLD', priority: 'mid', terms: ['china','russia','ukraine','israel','iran','gaza','europe','britain','france','germany','mexico','canada','world','global','foreign'] },
+    { key: 'money', label: '💰 MONEY', priority: 'mid', terms: ['market','markets','stocks','economy','inflation','jobs','layoffs','fed','rates','bank','housing','prices','tariff','debt','billion'] },
+    { key: 'health', label: '☠️ HEALTH SCARE', priority: 'high', terms: ['virus','disease','outbreak','pandemic','health','medical','hospital','cancer','vaccine','death toll','recall','contamination','bird flu'] },
+    { key: 'entertainment', label: '🎬 ENTERTAINMENT', priority: 'mid', terms: ['celebrity','movie','music','hollywood','actor','singer','netflix','disney','trailer','album','concert','diddy','taylor swift'] },
+    { key: 'crime', label: '⚖️ CRIME', priority: 'high', terms: ['crime','criminal','trial','court','judge','jury','lawsuit','arrested','charged','convicted','guilty','murder','killed','shooting','justice','prison'] },
+    { key: 'tech', label: '🤖 TECH', priority: 'mid', terms: ['tech','ai','artificial intelligence','openai','google','apple','meta','tesla','robot','social media','tiktok','x ','twitter','hack','cyber'] },
+    { key: 'sports', label: '🏈 SPORTS', priority: 'mid', terms: ['nfl','nba','mlb','nhl','espn','sports','football','basketball','baseball','soccer','coach','playoff','finals','super bowl'] },
+    { key: 'wtf', label: '😂 WTF', priority: 'low', terms: ['wtf','what the hell','ridiculous','stupid','clown','fail','awkward','caught on camera','viral','fark','boing boing'] },
+  ];
+  const match = rules.find(rule => rule.terms.some(term => text.includes(term)));
+  if (match) return { key: match.key, label: match.label, priority: match.priority };
+  if (story.category === 'sports') return { key: 'sports', label: '🏈 SPORTS', priority: 'mid' };
+  if (story.category === 'tech') return { key: 'tech', label: '🤖 TECH', priority: 'mid' };
+  if (story.category === 'business') return { key: 'money', label: '💰 MONEY', priority: 'mid' };
+  if (story.category === 'entertainment') return { key: 'entertainment', label: '🎬 ENTERTAINMENT', priority: 'mid' };
+  if (story.category === 'weird') return { key: 'wtf', label: '😂 WTF', priority: 'low' };
+  if (story.category === 'news' || story.category === 'politics') return { key: 'breaking', label: '💥 BREAKING', priority: 'high' };
+  return { key: 'world', label: '🌍 WORLD', priority: 'mid' };
+}
+
+function calculatePriorityScore(story, group) {
+  const uniqueSources = [...new Set(group.map(s => s.source))];
+  const sourceScore = Math.min(3, uniqueSources.reduce((sum, source) => sum + (SOURCE_WEIGHTS[source] || 1), 0) * 0.45);
+  const overlapScore = Math.min(2.5, Math.max(0, uniqueSources.length - 1) * 0.75);
+  const freshnessScore = getFreshnessScore(story.pubDate);
+  const headlineScore = getHeadlineHeatScore(story.originalHeadline);
+  const categoryScore = CATEGORY_BOOSTS[story.category] || 0.25;
+  const trendScore = Math.min(2, story.trendMatches.length * 1.5);
+  const badgeScore = story.badge.priority === 'high' ? 1.5 : story.badge.priority === 'mid' ? 0.75 : 0.25;
+  const rawScore = sourceScore + overlapScore + freshnessScore + headlineScore + categoryScore + trendScore;
+
+  return rawScore + badgeScore;
+}
+
+function getFreshnessScore(date) {
+  const ageHours = Math.max(0, (Date.now() - date.getTime()) / 3600000);
+  if (ageHours <= 1) return 1.5;
+  if (ageHours <= 3) return 1.25;
+  if (ageHours <= 6) return 1;
+  if (ageHours <= 12) return 0.5;
+  if (ageHours <= 24) return 0.25;
+  return 0;
+}
+
+function getHeadlineHeatScore(headline) {
+  const words = headline.toLowerCase().replace(/[^a-z0-9 ]/g, '').split(' ');
+  const matches = words.filter(word => HEAT_TERMS.has(word)).length;
+  return Math.min(2, matches * 0.75);
+}
+
+function getTrendMatches(headline) {
+  const normalizedHeadline = headline.toLowerCase();
+  return trendTerms.filter(term => normalizedHeadline.includes(term));
+}
+
+function makeStoryId(url, index) {
+  let hash = 0;
+  for (let i = 0; i < url.length; i++) {
+    hash = ((hash << 5) - hash) + url.charCodeAt(i);
+    hash |= 0;
+  }
+  return `story_${index}_${Math.abs(hash)}`;
+}
+
+// ── RENDER ──
+function renderFeed() {
+  if (allStories.length === 0) {
+    try {
+      const saved = sessionStorage.getItem('syf_stories');
+      if (saved) allStories = deduplicateAndScore(JSON.parse(saved));
+    } catch(e) {}
+  }
+  let stories = [...allStories];
+
+  // Apply filters
+  if (currentFilter.category !== 'all') {
+    stories = stories.filter(s => s.category === currentFilter.category);
+  }
+  if (currentFilter.source !== 'all') stories = stories.filter(s => s.source === currentFilter.source);
+  if (currentFilter.badge !== 'all' && currentFilter.badge !== 'best') stories = stories.filter(s => s.badge?.key === currentFilter.badge);
+  if (currentFilter.badge === 'best') {
+    stories = stories
+      .sort((a, b) => b.priorityScore - a.priorityScore || b.pubDate - a.pubDate)
+      .slice(0, 25);
+  }
+  if (currentFilter.trend) stories = stories.filter(s => s.trendMatches && s.trendMatches.length);
+
+  // Sort
+  if (currentSort === 'priority') stories.sort((a, b) => b.priorityScore - a.priorityScore);
+  if (currentSort === 'time') stories.sort((a, b) => b.pubDate - a.pubDate);
+
+  if (stories.length === 0) {
+    document.getElementById('story-feed').innerHTML = `<div class="empty-state"><h2>NO STORIES</h2><p style="font-size:12px;letter-spacing:1px;">Try a different filter or refresh</p></div>`;
+    return;
+  }
+
+  try {
+    const html = stories.map(story => renderCard(story)).join('');
+    document.getElementById('story-feed').innerHTML = html;
+  } catch(e) {
+    console.error('Render error:', e);
+  }
+}
+
+function renderCard(story) {
+  const badge = story.badge || { label: '🌍 WORLD', priority: 'mid' };
+  const publishedClass = story.published ? 'published' : '';
+  const sourcesHtml = story.sources && story.sources.length > 1
+    ? `<span style="color:var(--muted2)"> · ${story.sources.slice(0,4).join(', ')}${story.sources.length > 4 ? ` +${story.sources.length-4} more` : ''}</span>`
+    : '';
+  const trendHtml = story.trendMatches && story.trendMatches.length
+    ? `<div class="trend-match">TREND MATCH: ${story.trendMatches.slice(0,3).join(', ').toUpperCase()}</div>`
+    : '';
+
+  const rewrittenIndicator = story.rewritten
+    ? `<div class="card-original">Original: ${story.originalHeadline}</div>`
+    : '';
+
+  const timeAgo = getTimeAgo(story.pubDate);
+
+  return `
+  <div class="story-card ${publishedClass}" id="card-${story.id}">
+    <div class="card-top">
+      <div class="story-badge priority-${badge.priority}">${badge.label}</div>
+      <div class="card-content">
+        <div class="card-source">${story.source}${sourcesHtml}</div>
+        <div class="card-headline" id="headline-${story.id}">${story.headline}</div>
+        ${trendHtml}
+        ${rewrittenIndicator}
+        <div class="card-meta">${timeAgo} · ${story.category.toUpperCase()} · <a href="${story.url}" target="_blank" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--muted2);">VIEW STORY ↗</a></div>
+      </div>
+    </div>
+    <div class="card-actions">
+      <button class="placement-btn hero" onclick="publishStory('${story.id}', 'hero')">★ HERO</button>
+      <button class="placement-btn left" onclick="publishStory('${story.id}', 'left')">← LEFT</button>
+      <button class="placement-btn right" onclick="publishStory('${story.id}', 'right')">RIGHT →</button>
+      <button class="placement-btn chaos" onclick="publishStory('${story.id}', 'chaos')">CHAOS ⚡</button>
+      <button class="rewrite-btn" id="rewrite-${story.id}" onclick="rewriteHeadline('${story.id}')" ${!config.claudeKey ? 'disabled title="Add Claude API key to enable"' : ''}>
+        ${config.claudeKey ? '✦ AI REWRITE' : '✦ AI REWRITE (needs key)'}
+      </button>
+    </div>
+    ${story.published ? '<div style="padding:6px 0 0;font-size:10px;letter-spacing:2px;color:var(--green);">✓ PUBLISHED TO SANITY</div>' : ''}
+  </div>`;
+}
+
+function getTimeAgo(date) {
+  const mins = Math.floor((Date.now() - date) / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs/24)}d ago`;
+}
+
+// ── PUBLISHED STORY MANAGER ──
+function toggleStoryManager() {
+  const panel = document.getElementById('story-manager');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) loadPublishedStories();
+}
+
+async function loadPublishedStories() {
+  const list = document.getElementById('published-story-list');
+  list.className = 'manager-empty';
+  list.textContent = 'Loading published stories...';
+  try {
+    const query = `*[_type == "story"] | order(publishedAt desc, _createdAt desc)[0...80]{
+      _id,
+      headline,
+      subheadline,
+      url,
+      imageUrl,
+      imageHidden,
+      placement,
+      featured,
+      isActive,
+      publishedAt
+    }`;
+    const res = await fetch(`/api/sanity?query=${encodeURIComponent(query)}`, {
+      headers: config.apiToken ? { 'x-sanity-token': config.apiToken } : {},
+      cache: 'no-store'
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'Could not load stories');
+    renderPublishedStories(data.result || []);
+  } catch (e) {
+    list.textContent = `Could not load stories: ${e.message || 'check Sanity connection'}`;
+    showToast(`LOAD FAILED: ${e.message || 'CHECK SANITY'}`, true);
+  }
+}
+
+function renderPublishedStories(stories) {
+  const list = document.getElementById('published-story-list');
+  if (!stories.length) {
+    list.className = 'manager-empty';
+    list.textContent = 'No published stories found.';
+    return;
+  }
+  list.className = '';
+  list.innerHTML = stories.map(story => `
+    <div class="story-manager-row" id="manager-${story._id}">
+      <input class="manager-input" id="headline-${story._id}" value="${escapeAttr(story.headline || '')}" placeholder="Headline" />
+      <select class="manager-select" id="placement-${story._id}">
+        ${['hero','left','right','chaos'].map(p => `<option value="${p}" ${story.placement === p ? 'selected' : ''}>${p.toUpperCase()}</option>`).join('')}
+      </select>
+      <input class="manager-input" id="image-${story._id}" value="${escapeAttr(story.imageUrl || '')}" placeholder="Image URL" />
+      <button class="btn btn-secondary manager-delete" onclick="deletePublishedStory('${story._id}')">DELETE</button>
+      <input class="manager-input" id="subheadline-${story._id}" value="${escapeAttr(story.subheadline || '')}" placeholder="Subheadline" />
+      <input class="manager-input" id="url-${story._id}" value="${escapeAttr(story.url || '')}" placeholder="Story URL" />
+      <select class="manager-select" id="featured-${story._id}">
+        <option value="false" ${story.featured ? '' : 'selected'}>NORMAL</option>
+        <option value="true" ${story.featured ? 'selected' : ''}>FEATURED</option>
+      </select>
+      <select class="manager-select" id="image-hidden-${story._id}">
+        <option value="false" ${story.imageHidden ? '' : 'selected'}>SHOW IMAGE</option>
+        <option value="true" ${story.imageHidden ? 'selected' : ''}>HIDE IMAGE</option>
+      </select>
+      <select class="manager-select" id="active-${story._id}">
+        <option value="true" ${story.isActive !== false ? 'selected' : ''}>ACTIVE</option>
+        <option value="false" ${story.isActive === false ? 'selected' : ''}>HIDDEN</option>
+      </select>
+      <div class="feed-meta">${story.publishedAt ? new Date(story.publishedAt).toLocaleString() : 'No date'}</div>
+      <div class="manager-actions">
+        <button class="btn btn-primary" onclick="savePublishedStory('${story._id}')">SAVE CHANGES</button>
+        <button class="btn btn-secondary manager-delete" onclick="deletePublishedStory('${story._id}')">DELETE FROM SANITY</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function savePublishedStory(id) {
+  if (!config.apiToken) {
+    showToast('ADD SANITY CONFIG FIRST', true);
+    return;
+  }
+  const patch = {
+    headline: document.getElementById(`headline-${id}`).value.trim(),
+    subheadline: document.getElementById(`subheadline-${id}`).value.trim(),
+    url: document.getElementById(`url-${id}`).value.trim(),
+    imageUrl: document.getElementById(`image-${id}`).value.trim(),
+    imageHidden: document.getElementById(`image-hidden-${id}`).value === 'true',
+    placement: document.getElementById(`placement-${id}`).value,
+    isActive: document.getElementById(`active-${id}`).value === 'true',
+    featured: document.getElementById(`featured-${id}`).value === 'true',
+  };
+  try {
+    const res = await fetch('/api/sanity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-sanity-token': config.apiToken },
+      body: JSON.stringify({ token: config.apiToken, mutations: [{ patch: { id, set: patch, unset: ['chaosColumn'] } }] })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'Save failed');
+    showToast('✓ STORY UPDATED');
+  } catch (e) {
+    showToast(`SAVE FAILED: ${e.message || 'CHECK TOKEN'}`, true);
+  }
+}
+
+async function deletePublishedStory(id) {
+  if (!config.apiToken) {
+    showToast('ADD SANITY CONFIG FIRST', true);
+    return;
+  }
+  if (!confirm('Delete this story from Sanity? This cannot be undone.')) return;
+  try {
+    const res = await fetch('/api/sanity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-sanity-token': config.apiToken },
+      body: JSON.stringify({ token: config.apiToken, mutations: [{ delete: { id } }] })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'Delete failed');
+    document.getElementById(`manager-${id}`)?.remove();
+    showToast('✓ STORY DELETED');
+  } catch (e) {
+    showToast(`DELETE FAILED: ${e.message || 'CHECK TOKEN'}`, true);
+  }
+}
+
+function escapeAttr(value) {
+  return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ── AI REWRITE ──
+async function rewriteHeadline(storyId) {
+  const story = allStories.find(s => s.id === storyId);
+  if (!story || !config.claudeKey) return;
+
+  const btn = document.getElementById(`rewrite-${storyId}`);
+  btn.textContent = 'REWRITING...';
+  btn.disabled = true;
+
+  try {
+    const response = await fetch('/api/rewrite', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        apiKey: config.claudeKey,
+        headline: story.originalHeadline
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Rewrite failed');
+    const rewritten = data.headline?.trim();
+
+    if (rewritten) {
+      story.headline = rewritten;
+      story.rewritten = true;
+      document.getElementById(`headline-${storyId}`).textContent = rewritten;
+      const card = document.getElementById(`card-${storyId}`);
+      // Add original indicator
+      const content = card.querySelector('.card-content');
+      let origEl = content.querySelector('.card-original');
+      if (!origEl) {
+        origEl = document.createElement('div');
+        origEl.className = 'card-original';
+        content.insertBefore(origEl, content.querySelector('.card-meta'));
+      }
+      origEl.textContent = `Original: ${story.originalHeadline}`;
+    }
+  } catch (e) {
+    showToast(`REWRITE FAILED: ${e.message || 'CHECK API KEY'}`, true);
+  }
+
+  btn.textContent = '✦ REWRITE AGAIN';
+  btn.disabled = false;
+}
+
+// ── PUBLISH TO SANITY ──
+async function publishStory(storyId, placement) {
+  if (!config.apiToken) {
+    showToast('ADD SANITY CONFIG FIRST', true);
+    return;
+  }
+
+  const story = allStories.find(s => s.id === storyId);
+  if (!story) return;
+
+  const doc = {
+    _type: 'story',
+    headline: story.headline,
+    url: story.url,
+    placement: placement,
+    imageHidden: false,
+    publishedAt: new Date().toISOString(),
+    isActive: true,
+  };
+
+  try {
+    const res = await fetch('/api/sanity', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-sanity-token': config.apiToken
+      },
+      body: JSON.stringify({ token: config.apiToken, mutations: [{ create: doc }] })
+    });
+
+    if (res.ok) {
+      story.published = true;
+      story.publishedPlacement = placement;
+      updateQueue(placement);
+      const card = document.getElementById(`card-${storyId}`);
+      card.classList.add('published');
+      showToast(`✓ PUBLISHED TO ${placement.toUpperCase()}`);
+    } else {
+      const err = await res.json();
+      showToast(`SANITY ERROR: ${err.error || err.message || 'CHECK TOKEN'}`, true);
+    }
+  } catch (e) {
+    showToast(`PUBLISH FAILED: ${e.message || 'CHECK CONNECTION'}`, true);
+  }
+}
+
+// ── QUEUE TRACKING ──
+function updateQueue(placement) {
+  if (placement === 'hero') {
+    publishedToday.hero = true;
+    document.getElementById('q-hero').textContent = '✓';
+    document.getElementById('q-hero').style.color = 'var(--green)';
+  } else if (placement === 'left') {
+    publishedToday.left = Math.min(6, publishedToday.left + 1);
+    document.getElementById('q-left').textContent = `${publishedToday.left}/6`;
+    if (publishedToday.left >= 6) document.getElementById('q-left').style.color = 'var(--accent)';
+  } else if (placement === 'right') {
+    publishedToday.right = Math.min(6, publishedToday.right + 1);
+    document.getElementById('q-right').textContent = `${publishedToday.right}/6`;
+    if (publishedToday.right >= 6) document.getElementById('q-right').style.color = 'var(--accent)';
+  } else if (placement === 'chaos') {
+    publishedToday.chaos++;
+    document.getElementById('q-chaos').textContent = publishedToday.chaos;
+  }
+}
+
+// ── FILTERS & SORT ──
+function filterCategory(cat, btn) {
+  currentFilter.category = cat;
+  currentFilter.badge = 'all';
+  currentFilter.source = 'all';
+  document.querySelectorAll('.category-filter').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.badge-filter').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.source-filter').forEach(b => b.classList.remove('active'));
+  document.querySelector('.badge-filter[onclick*="all"]')?.classList.add('active');
+  btn.classList.add('active');
+  renderFeed();
+}
+
+function filterBadge(level, btn) {
+  currentFilter.badge = level;
+  document.querySelectorAll('.badge-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderFeed();
+}
+
+function filterSource(source, btn) {
+  currentFilter.source = source;
+  currentFilter.category = 'all';
+  document.querySelectorAll('.source-filter').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.category-filter').forEach(b => b.classList.remove('active'));
+  document.querySelector('.category-filter[onclick*="all"]')?.classList.add('active');
+  btn.classList.add('active');
+  renderFeed();
+  showToast(`SHOWING ${source.toUpperCase()} STORIES`, false);
+}
+
+function sortBy(method) {
+  currentSort = method;
+  renderFeed();
+}
+
+function updateCounts() {
+  const cats = ['news','politics','business','tech','entertainment','weird','science','sports'];
+  document.getElementById('count-all').textContent = allStories.length;
+  cats.forEach(cat => {
+    const el = document.getElementById(`count-${cat}`);
+    if (el) el.textContent = allStories.filter(s => s.category === cat).length;
+  });
+}
+
+// ── TOAST ──
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${isError ? 'error' : ''} show`;
+  setTimeout(() => t.className = `toast ${isError ? 'error' : ''}`, 3000);
+}
+</script>
+</body>
+</html>

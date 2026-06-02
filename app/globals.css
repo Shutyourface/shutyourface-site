@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: #050505;
+}
+
+.dark body {
+  background: #050505;
+  color: #f8f8f8;
+}
+
+::selection {
+  background: #b91c1c;
+  color: #ffffff;
+}
+
+.ticker-track {
+  animation: ticker 26s linear infinite;
+}
+
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
