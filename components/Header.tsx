@@ -1,7 +1,22 @@
 export function Header() {
+  const now = new Date();
+  const timestamp = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "America/New_York",
+    timeZoneName: "short",
+  }).format(now);
+
   return (
     <header className="bg-white text-black">
       <div className="mx-auto max-w-[1500px] px-3 pt-3">
+        <div className="border-b-2 border-black pb-2 text-center font-mono text-xs font-black uppercase tracking-[0.2em] text-red-700 md:text-sm">
+          {timestamp}
+        </div>
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_260px] md:items-center">
           <div className="flex min-h-32 flex-col items-center justify-center px-2 text-center">
             <a href="#top" className="inline-block border-y-4 border-black px-2 py-1 font-sans text-6xl font-black uppercase leading-[0.86] tracking-[-0.075em] text-black shadow-[0_6px_0_0_rgba(185,28,28,0.18)] sm:text-7xl lg:text-9xl">

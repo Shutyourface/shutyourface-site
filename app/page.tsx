@@ -27,6 +27,7 @@ function stableRandomizeChaos(stories: DisplayStory[]) {
 
 export default async function Home() {
   const cmsStories = await getCmsStories();
+  const xProfileUrl = process.env.NEXT_PUBLIC_X_PROFILE_URL || "#";
   const cmsLeftStories = sortNewestFirst(cmsStories.filter((story) => story.placement === "left"));
   const cmsRightStories = sortNewestFirst(cmsStories.filter((story) => story.placement === "right" || story.placement === "top" || story.placement === "trending"));
   const cmsChaosStories = sortNewestFirst(cmsStories.filter((story) => story.placement === "chaos"));
@@ -117,13 +118,18 @@ export default async function Home() {
           <div className="grid gap-5 md:grid-cols-[1fr_1.2fr_1fr] md:items-center">
             <div>
               <p className="font-tabloid text-3xl uppercase">Get the news first</p>
-              <p className="text-sm">Join 250,000+ readers who refuse to be lied to.</p>
+              <p className="text-sm">Join the list for new stories, site updates, and zero corporate fluff.</p>
             </div>
             <form className="flex gap-3">
               <input aria-label="Footer email address" type="email" placeholder="Enter your email" className="min-h-12 flex-1 px-4 text-black" />
               <button type="submit" className="bg-red-700 px-5 font-tabloid text-2xl uppercase text-white hover:bg-white hover:text-black">Subscribe now</button>
             </form>
-            <div className="font-tabloid text-2xl uppercase">Follow us &nbsp; X ◎ ▶ RSS</div>
+            <div className="font-tabloid text-2xl uppercase">
+              Follow us{" "}
+              <a href={xProfileUrl} className="text-red-500 underline decoration-2 hover:text-white">
+                on X
+              </a>
+            </div>
           </div>
           <div className="mt-5 border-t border-zinc-700 pt-4 text-center text-sm">
             <p>© 2026 ShutYourFace.com | All rights reserved.</p>
