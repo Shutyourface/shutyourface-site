@@ -720,8 +720,11 @@ function renderSourceList() {
 
 // ── RSS FETCH ──
 async function fetchRSS(source) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+
   try {
-    const res = await fetch(`/api/rss?url=${encodeURIComponent(source.url)}`);
+    const res = await fetch(`/api/rss?url=${encodeURIComponent(source.url)}`, { signal: controller.signal });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(errorData.error || `HTTP ${res.status}`);
@@ -754,7 +757,10 @@ async function fetchRSS(source) {
     return { source, stories, error: null };
   } catch (e) {
     console.warn(`Failed to fetch ${source.name}:`, e);
-    return { source, stories: [], error: e.message || 'Failed to fetch' };
+    const message = e.name === 'AbortError' ? 'RSS source timed out' : e.message || 'Failed to fetch';
+    return { source, stories: [], error: message };
+  } finally {
+    clearTimeout(timeout);
   }
 }
 

@@ -14,13 +14,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid RSS URL protocol" }, { status: 400 });
     }
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
     const response = await fetch(parsedUrl.toString(), {
       headers: {
         "User-Agent": "ShutYourFaceCurationBot/1.0",
         Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml, */*",
       },
       cache: "no-store",
-    });
+      signal: controller.signal,
+    }).finally(() => clearTimeout(timeout));
 
     if (!response.ok) {
       return NextResponse.json({ error: `RSS source returned ${response.status}` }, { status: 502 });
@@ -35,7 +39,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unable to fetch RSS source";
+    const message = error instanceof Error && error.name === "AbortError" ? "RSS source timed out" : error instanceof Error ? error.message : "Unable to fetch RSS source";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -5,11 +5,11 @@ import path from "node:path";
 
 const cookieName = "syf_dashboard_auth";
 
-export async function GET() {
+export async function GET(request: Request) {
   const isUnlocked = cookies().get(cookieName)?.value === "ok";
 
   if (!isUnlocked) {
-    return NextResponse.redirect(new URL("/dashboard", process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"));
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   const filePath = path.join(process.cwd(), "private", "syf-curation-dashboard.html");
