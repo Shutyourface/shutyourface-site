@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   width: "1500",
+  initialScale: 0.25,
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

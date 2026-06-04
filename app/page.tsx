@@ -25,6 +25,10 @@ function stableRandomizeChaos(stories: DisplayStory[]) {
   return [...stories].sort((a, b) => hashString(`${seed}:${a._id}`) - hashString(`${seed}:${b._id}`));
 }
 
+function externalLinkProps(url?: string) {
+  return url ? { target: "_blank", rel: "noopener noreferrer" } : {};
+}
+
 export default async function Home() {
   const cmsStories = await getCmsStories();
   const xProfileUrl = process.env.NEXT_PUBLIC_X_PROFILE_URL || "#";
@@ -44,7 +48,7 @@ export default async function Home() {
       }
     : null;
   const leftPool: DisplayStory[] = cmsLeftStories;
-  const rightPool: DisplayStory[] = [...cmsRightStories, ...olderHeroStories];
+  const rightPool: DisplayStory[] = [...olderHeroStories, ...cmsRightStories];
   const activeLeftLinks = leftPool.slice(0, 6);
   const activeRightStories = rightPool.slice(0, 6);
   const sideOverflow = [...leftPool.slice(6), ...rightPool.slice(6)];
@@ -58,7 +62,7 @@ export default async function Home() {
         <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1.6fr)_360px]">
           <section className="space-y-3 text-lg font-black uppercase leading-tight">
             {activeLeftLinks.map((story, index) => (
-              <a key={story.headline} href={story.url || "#"} className={`${index === 0 ? "text-red-700" : ""} block underline decoration-2 hover:bg-red-700 hover:text-white`}>
+              <a key={story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${index === 0 ? "text-red-700" : ""} block underline decoration-2 hover:bg-red-700 hover:text-white`}>
                 {story.imageUrl && !story.imageHidden ? (
                   <img src={story.imageUrl} alt="" className="mb-2 h-auto w-full border-2 border-black object-cover grayscale contrast-125" loading="lazy" />
                 ) : null}
@@ -74,7 +78,7 @@ export default async function Home() {
                     <img src={activeMainStory.imageUrl} alt="" className="h-full w-full object-cover object-top grayscale contrast-125" loading="eager" />
                   </div>
                 ) : null}
-                <a href={activeMainStory.url || "#"} className="mt-3 block font-tabloid text-4xl uppercase leading-none tracking-tight text-red-700 hover:text-black md:text-6xl">
+                <a href={activeMainStory.url || "#"} {...externalLinkProps(activeMainStory.url)} className="mt-3 block font-tabloid text-4xl uppercase leading-none tracking-tight text-red-700 hover:text-black md:text-6xl">
                   {activeMainStory.headline}
                 </a>
                 {activeMainStory.subheadline ? (
@@ -88,7 +92,7 @@ export default async function Home() {
           <aside>
             <div className="space-y-3 text-lg font-black uppercase leading-tight">
               {activeRightStories.map((story) => (
-                <a key={story.headline} href={story.url || "#"} className="block border-b-2 border-black pb-3 underline decoration-2 hover:bg-red-700 hover:text-white">
+                <a key={story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className="block border-b-2 border-black pb-3 underline decoration-2 hover:bg-red-700 hover:text-white">
                   {story.imageUrl && !story.imageHidden ? (
                     <img src={story.imageUrl} alt="" className="mb-2 h-auto w-full border-2 border-black object-cover grayscale contrast-125" loading="lazy" />
                   ) : null}
@@ -103,7 +107,7 @@ export default async function Home() {
         </div>
         <section className="mt-5 columns-1 gap-5 md:columns-3 xl:columns-4">
           {activeChaosStories.map((story, index) => (
-            <a key={story.headline} href={story.url || "#"} className={`${story.featured ? "text-3xl" : index % 4 === 0 ? "text-2xl" : "text-lg"} mb-4 block break-inside-avoid border-b-2 border-black pb-3 font-black uppercase leading-none underline decoration-2 hover:bg-red-700 hover:text-white`}>
+            <a key={story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${story.featured ? "text-3xl" : index % 4 === 0 ? "text-2xl" : "text-lg"} mb-4 block break-inside-avoid border-b-2 border-black pb-3 font-black uppercase leading-none underline decoration-2 hover:bg-red-700 hover:text-white`}>
               {story.imageUrl && !story.imageHidden ? (
                 <img src={story.imageUrl} alt="" className="mb-2 h-auto w-full border-2 border-black object-cover grayscale contrast-125" loading="lazy" />
               ) : null}
