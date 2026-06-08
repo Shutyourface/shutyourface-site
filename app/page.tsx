@@ -57,9 +57,9 @@ export default async function Home() {
         <div className="mt-7 border-y-4 border-black py-3 text-center font-tabloid text-3xl uppercase leading-none md:text-5xl">
           No sections. No mercy. Just the hits.
         </div>
-        <section className="mt-5 grid grid-cols-4 items-start gap-x-5 gap-y-6">
+        <section className="mt-5 columns-4 gap-5">
           {activeChaosStories.map((story, index) => (
-            <a key={story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${story.featured ? "text-3xl" : index % 4 === 0 ? "text-2xl" : "text-lg"} block border-b-2 border-black pb-3 font-black uppercase leading-none underline decoration-2 hover:bg-red-700 hover:text-white`}>
+            <a key={story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${story.featured ? "text-3xl" : index % 4 === 0 ? "text-2xl" : "text-lg"} mb-4 block break-inside-avoid border-b-2 border-black pb-3 font-black uppercase leading-none underline decoration-2 hover:bg-red-700 hover:text-white`}>
               {story.imageUrl && !story.imageHidden ? (
                 <img src={story.imageUrl} alt="" className="mb-2 h-32 w-full border-2 border-black object-cover object-top grayscale contrast-125" loading="lazy" />
               ) : null}
