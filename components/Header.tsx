@@ -1,3 +1,5 @@
+import { MailchimpSignup } from "@/components/MailchimpSignup";
+
 export function Header() {
   const now = new Date();
   const timestamp = new Intl.DateTimeFormat("en-US", {
@@ -28,10 +30,7 @@ export function Header() {
           </div>
           <div className="hidden border-2 border-black p-3 md:block">
             <p className="font-tabloid text-xl uppercase">Get the news first</p>
-            <form className="mt-2 flex gap-2">
-              <input aria-label="Header email address" type="email" placeholder="Enter your email" className="min-w-0 flex-1 border border-black px-2 py-2 text-sm text-black" />
-              <button type="submit" className="bg-red-700 px-3 py-2 font-tabloid text-lg uppercase text-white hover:bg-black">Subscribe</button>
-            </form>
+            <MailchimpSignup variant="header" />
           </div>
         </div>
       </div>

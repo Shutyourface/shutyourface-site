@@ -1,4 +1,5 @@
 import { Header } from "@/components/Header";
+import { MailchimpSignup } from "@/components/MailchimpSignup";
 import { getCmsStories } from "@/lib/sanity";
 import { buildStoryLayout, externalLinkProps } from "@/lib/storyLayout";
 
@@ -83,10 +84,7 @@ export default async function Home() {
               <p className="font-tabloid text-3xl uppercase">Get the news first</p>
               <p className="text-sm">Join the list for new stories, site updates, and zero corporate fluff.</p>
             </div>
-            <form className="flex gap-3">
-              <input aria-label="Footer email address" type="email" placeholder="Enter your email" className="min-h-12 flex-1 px-4 text-black" />
-              <button type="submit" className="bg-red-700 px-5 font-tabloid text-2xl uppercase text-white hover:bg-white hover:text-black">Subscribe now</button>
-            </form>
+            <MailchimpSignup variant="footer" />
             <div className="font-tabloid text-2xl uppercase">
               Follow us{" "}
               <a href={xProfileUrl} className="text-red-500 underline decoration-2 hover:text-white">
