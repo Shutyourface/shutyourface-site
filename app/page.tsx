@@ -1,59 +1,11 @@
 import { Header } from "@/components/Header";
 import { getCmsStories } from "@/lib/sanity";
-import type { CmsStory } from "@/lib/sanity";
-
-type DisplayStory = Pick<CmsStory, "_id" | "_createdAt" | "headline" | "subheadline" | "url" | "imageUrl" | "imageHidden" | "featured" | "publishedAt">;
-
-function storyTime(story: DisplayStory) {
-  return new Date(story.publishedAt || story._createdAt || 0).getTime();
-}
-
-function sortNewestFirst(stories: DisplayStory[]) {
-  return [...stories].sort((a, b) => storyTime(b) - storyTime(a));
-}
-
-function hashString(value: string) {
-  let hash = 0;
-  for (let index = 0; index < value.length; index++) {
-    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
-  }
-  return hash;
-}
-
-function stableRandomizeChaos(stories: DisplayStory[]) {
-  const seed = stories.map((story) => story._id).sort().join("|");
-  return [...stories].sort((a, b) => hashString(`${seed}:${a._id}`) - hashString(`${seed}:${b._id}`));
-}
-
-function externalLinkProps(url?: string) {
-  return url ? { target: "_blank", rel: "noopener noreferrer" } : {};
-}
+import { buildStoryLayout, externalLinkProps } from "@/lib/storyLayout";
 
 export default async function Home() {
   const cmsStories = await getCmsStories();
-  const xProfileUrl = process.env.NEXT_PUBLIC_X_PROFILE_URL || "#";
-  const cmsLeftStories = sortNewestFirst(cmsStories.filter((story) => story.placement === "left"));
-  const cmsRightStories = sortNewestFirst(cmsStories.filter((story) => story.placement === "right" || story.placement === "top" || story.placement === "trending"));
-  const cmsChaosStories = sortNewestFirst(cmsStories.filter((story) => story.placement === "chaos"));
-  const cmsHeroStories = sortNewestFirst(cmsStories.filter((story) => story.placement === "hero" || story.placement === "main"));
-  const cmsHeroStory = cmsHeroStories[0];
-  const olderHeroStories = cmsHeroStories.slice(1);
-  const activeMainStory = cmsHeroStory
-    ? {
-        headline: cmsHeroStory.headline,
-        subheadline: cmsHeroStory.subheadline,
-        imageUrl: cmsHeroStory.imageUrl,
-        imageHidden: cmsHeroStory.imageHidden,
-        url: cmsHeroStory.url,
-      }
-    : null;
-  const leftPool: DisplayStory[] = cmsLeftStories;
-  const rightPool: DisplayStory[] = [...olderHeroStories, ...cmsRightStories];
-  const activeLeftLinks = leftPool.slice(0, 6);
-  const activeRightStories = rightPool.slice(0, 6);
-  const sideOverflow = [...leftPool.slice(6), ...rightPool.slice(6)];
-  const baseChaosStories: DisplayStory[] = cmsChaosStories;
-  const activeChaosStories = stableRandomizeChaos([...sideOverflow, ...baseChaosStories]);
+  const xProfileUrl = process.env.NEXT_PUBLIC_X_PROFILE_URL || "https://x.com/SYF_News";
+  const { activeMainStory, activeLeftLinks, activeRightStories, activeChaosStories, moreFaceStories } = buildStoryLayout(cmsStories);
 
   return (
     <main id="top" className="min-h-screen bg-white text-black">
@@ -115,6 +67,13 @@ export default async function Home() {
             </a>
           ))}
         </section>
+        {moreFaceStories.length ? (
+          <div className="mt-6 text-center">
+            <a href="/more-face" className="inline-block border-4 border-black bg-red-700 px-8 py-4 font-tabloid text-5xl uppercase leading-none text-white shadow-[8px_8px_0_0_#000] hover:bg-black">
+              More Face →
+            </a>
+          </div>
+        ) : null}
         <div className="my-7 bg-black px-5 py-7 text-center font-tabloid text-5xl uppercase italic leading-none text-white md:text-7xl" style={{ clipPath: "polygon(0 8%, 3% 0, 8% 7%, 14% 1%, 21% 8%, 29% 0, 36% 7%, 44% 2%, 52% 8%, 61% 0, 70% 7%, 78% 1%, 87% 8%, 95% 0, 100% 7%, 98% 92%, 93% 100%, 84% 93%, 75% 99%, 66% 92%, 58% 100%, 49% 93%, 41% 99%, 32% 92%, 24% 100%, 15% 93%, 7% 99%, 0 92%)" }}>
           Shut <span className="text-red-600">your</span> face.<br className="sm:hidden" /> Open <span className="text-red-600">your</span> eyes.
         </div>
