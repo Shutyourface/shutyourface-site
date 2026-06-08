@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="10" fill="#ffffff"/>
-  <rect x="4" y="4" width="56" height="56" rx="8" fill="none" stroke="#000000" stroke-width="4"/>
-  <text x="32" y="27" text-anchor="middle" font-family="Arial Black, Impact, sans-serif" font-size="18" font-weight="900" fill="#000000">SYF</text>
-  <rect x="9" y="34" width="46" height="18" fill="#b91c1c"/>
-  <text x="32" y="48" text-anchor="middle" font-family="Arial Black, Impact, sans-serif" font-size="12" font-weight="900" fill="#ffffff">NEWS</text>
+  <rect width="64" height="64" fill="#ffffff"/>
+  <circle cx="32" cy="32" r="29" fill="#fffaf0" stroke="#000000" stroke-width="4"/>
+  <text x="32" y="20" text-anchor="middle" font-family="Arial Black, Impact, sans-serif" font-size="17" font-weight="900" fill="#000000">SHUT</text>
+  <text x="32" y="39" text-anchor="middle" font-family="Arial Black, Impact, sans-serif" font-size="19" font-weight="900" fill="#dc0000">YOUR</text>
+  <text x="32" y="56" text-anchor="middle" font-family="Arial Black, Impact, sans-serif" font-size="17" font-weight="900" fill="#000000">FACE</text>
+  <path d="M8 30h8M9 23l7 4M9 37l7-4M48 30h8M48 27l7-4M48 33l7 4" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
 </svg>
