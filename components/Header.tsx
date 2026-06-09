@@ -25,7 +25,7 @@ export function Header() {
               SHUT<span className="text-red-700">YOUR</span>FACE<span className="ml-2 align-baseline text-2xl font-black tracking-[-0.03em] text-red-700 sm:text-3xl lg:text-5xl">.com</span>
             </a>
             <p className="mt-3 border-t border-zinc-300 pt-1 font-sans text-lg font-extrabold uppercase tracking-[0.08em] md:text-2xl">
-              <span className="text-red-700">★</span> We don't pick sides. We just pick stories. <span className="text-red-700">★</span>
+              <span className="text-red-700">★</span> We don&apos;t pick sides. We just pick stories. <span className="text-red-700">★</span>
             </p>
           </div>
           <div className="hidden border-2 border-black p-3 md:block">
