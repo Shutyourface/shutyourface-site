@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SHUTYOUR FACE | Real News. No BS. Say Less.",
+  title: "SHUTYOURFACE | We don't pick sides. We just pick stories.",
   description: "A fast retro political news aggregation front page with tabloid energy.",
   icons: {
     icon: "/favicon.png",
