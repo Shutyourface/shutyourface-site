@@ -47,7 +47,7 @@ export function buildStoryLayout(cmsStories: CmsStory[]) {
       }
     : null;
   const leftPool: DisplayStory[] = cmsLeftStories;
-  const rightPool: DisplayStory[] = [...olderHeroStories, ...cmsRightStories];
+  const rightPool: DisplayStory[] = sortNewestFirst([...olderHeroStories, ...cmsRightStories]);
   const activeLeftLinks = leftPool.slice(0, 6);
   const activeRightStories = rightPool.slice(0, 6);
   const sideOverflow = [...leftPool.slice(6), ...rightPool.slice(6)];
