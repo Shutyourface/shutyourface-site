@@ -47,10 +47,10 @@ export function buildStoryLayout(cmsStories: CmsStory[]) {
       }
     : null;
   const leftPool: DisplayStory[] = cmsLeftStories;
-  const rightPool: DisplayStory[] = [...olderHeroStories, ...cmsRightStories];
+  const rightPool: DisplayStory[] = cmsRightStories;
   const activeLeftLinks = leftPool.slice(0, 6);
   const activeRightStories = rightPool.slice(0, 6);
-  const sideOverflow = [...leftPool.slice(6), ...rightPool.slice(6)];
+  const sideOverflow = [...leftPool.slice(6), ...rightPool.slice(6), ...olderHeroStories];
   const activeChaosPool = stableRandomizeChaos([...sideOverflow, ...cmsChaosStories]);
   const activeChaosStories = activeChaosPool.slice(0, HOMEPAGE_CHAOS_LIMIT);
   const moreFaceStories = activeChaosPool.slice(HOMEPAGE_CHAOS_LIMIT, HOMEPAGE_CHAOS_LIMIT + MORE_FACE_LIMIT);
