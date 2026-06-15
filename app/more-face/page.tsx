@@ -21,11 +21,11 @@ export default async function MoreFacePage() {
           <span>{moreFaceStories.length} extra stories</span>
         </div>
         {moreFaceStories.length ? (
-          <section className="mt-5 flex gap-5">
+          <section className="mt-5 flex gap-5 items-start">
             {moreFaceColumns.map((column, colIndex) => (
               <div key={colIndex} className="flex-1">
-                {column.map((story, index) => (
-                  <a key={story._id || story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${story.featured ? "text-3xl" : index === 0 ? "text-2xl" : "text-lg"} mb-4 block break-inside-avoid border-b-2 border-black pb-3 font-black uppercase leading-none underline decoration-2 hover:bg-red-700 hover:text-white`}>
+                {column.map((story) => (
+                  <a key={story._id || story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${story.featured ? "text-3xl" : "text-lg"} mb-5 block font-black uppercase leading-tight underline decoration-2 hover:bg-red-700 hover:text-white`}>
                     {story.imageUrl && !story.imageHidden ? (
                       <img src={story.imageUrl} alt="" className="mb-2 h-48 w-full border-2 border-black object-cover object-[center_20%] grayscale contrast-125" loading="lazy" />
                     ) : null}
