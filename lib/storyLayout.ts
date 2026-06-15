@@ -2,7 +2,7 @@ import type { CmsStory } from "@/lib/sanity";
 
 export type DisplayStory = Pick<CmsStory, "_id" | "_createdAt" | "headline" | "subheadline" | "url" | "imageUrl" | "imageHidden" | "featured" | "publishedAt">;
 
-export const HOMEPAGE_CHAOS_LIMIT = 32;
+export const HOMEPAGE_CHAOS_LIMIT = 48;
 export const MORE_FACE_LIMIT = 100;
 
 export function storyTime(story: DisplayStory) {
@@ -104,7 +104,7 @@ export function buildStoryLayout(cmsStories: CmsStory[]) {
   const activeChaosPool = sortNewestFirst([...sideOverflow, ...cmsChaosStories]);
   const activeChaosPoolLimited = activeChaosPool.slice(0, HOMEPAGE_CHAOS_LIMIT);
   const moreFaceStories = activeChaosPool.slice(HOMEPAGE_CHAOS_LIMIT, HOMEPAGE_CHAOS_LIMIT + MORE_FACE_LIMIT);
-  const activeChaosColumns = distributeToColumnsWithImageConstraint(activeChaosPoolLimited, 4);
+  const activeChaosColumns = distributeToColumns(activeChaosPoolLimited, 4);
 
   return {
     activeMainStory,
