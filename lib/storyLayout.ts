@@ -2,7 +2,7 @@ import type { CmsStory } from "@/lib/sanity";
 
 export type DisplayStory = Pick<CmsStory, "_id" | "_createdAt" | "headline" | "subheadline" | "url" | "imageUrl" | "imageHidden" | "featured" | "publishedAt">;
 
-export const HOMEPAGE_CHAOS_LIMIT = 48;
+export const HOMEPAGE_CHAOS_LIMIT = 36;
 export const MORE_FACE_LIMIT = 100;
 
 export function storyTime(story: DisplayStory) {
