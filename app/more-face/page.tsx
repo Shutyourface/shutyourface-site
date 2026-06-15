@@ -20,9 +20,9 @@ export default async function MoreFacePage() {
           <span>{moreFaceStories.length} extra stories</span>
         </div>
         {moreFaceStories.length ? (
-          <section className="mt-5 columns-4 gap-5">
+          <section className="mt-5 grid grid-cols-4 gap-5">
             {moreFaceStories.map((story, index) => (
-              <a key={story._id || story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${story.featured ? "text-3xl" : index % 4 === 0 ? "text-2xl" : "text-lg"} mb-4 block break-inside-avoid border-b-2 border-black pb-3 font-black uppercase leading-none underline decoration-2 hover:bg-red-700 hover:text-white`}>
+              <a key={story._id || story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${story.featured ? "text-3xl" : index % 4 === 0 ? "text-2xl" : "text-lg"} mb-4 block border-b-2 border-black pb-3 font-black uppercase leading-none underline decoration-2 hover:bg-red-700 hover:text-white`}>
                 {story.imageUrl && !story.imageHidden ? (
                   <img src={story.imageUrl} alt="" className="mb-2 h-48 w-full border-2 border-black object-cover object-[center_20%] grayscale contrast-125" loading="lazy" />
                 ) : null}
