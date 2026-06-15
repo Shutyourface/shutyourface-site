@@ -1,10 +1,11 @@
 import { Header } from "@/components/Header";
 import { getCmsStories } from "@/lib/sanity";
-import { buildStoryLayout, externalLinkProps } from "@/lib/storyLayout";
+import { buildStoryLayout, externalLinkProps, distributeToColumns } from "@/lib/storyLayout";
 
 export default async function MoreFacePage() {
   const cmsStories = await getCmsStories();
   const { moreFaceStories } = buildStoryLayout(cmsStories);
+  const moreFaceColumns = distributeToColumns(moreFaceStories, 4);
 
   return (
     <main id="top" className="min-h-screen bg-white text-black">
@@ -20,14 +21,18 @@ export default async function MoreFacePage() {
           <span>{moreFaceStories.length} extra stories</span>
         </div>
         {moreFaceStories.length ? (
-          <section className="mt-5 grid grid-cols-4 gap-5">
-            {moreFaceStories.map((story, index) => (
-              <a key={story._id || story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${story.featured ? "text-3xl" : index % 4 === 0 ? "text-2xl" : "text-lg"} mb-4 block border-b-2 border-black pb-3 font-black uppercase leading-none underline decoration-2 hover:bg-red-700 hover:text-white`}>
-                {story.imageUrl && !story.imageHidden ? (
-                  <img src={story.imageUrl} alt="" className="mb-2 h-48 w-full border-2 border-black object-cover object-[center_20%] grayscale contrast-125" loading="lazy" />
-                ) : null}
-                {story.headline}
-              </a>
+          <section className="mt-5 flex gap-5">
+            {moreFaceColumns.map((column, colIndex) => (
+              <div key={colIndex} className="flex-1">
+                {column.map((story, index) => (
+                  <a key={story._id || story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${story.featured ? "text-3xl" : index === 0 ? "text-2xl" : "text-lg"} mb-4 block break-inside-avoid border-b-2 border-black pb-3 font-black uppercase leading-none underline decoration-2 hover:bg-red-700 hover:text-white`}>
+                    {story.imageUrl && !story.imageHidden ? (
+                      <img src={story.imageUrl} alt="" className="mb-2 h-48 w-full border-2 border-black object-cover object-[center_20%] grayscale contrast-125" loading="lazy" />
+                    ) : null}
+                    {story.headline}
+                  </a>
+                ))}
+              </div>
             ))}
           </section>
         ) : (

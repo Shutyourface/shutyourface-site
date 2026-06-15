@@ -30,6 +30,14 @@ export function externalLinkProps(url?: string) {
   return url ? { target: "_blank", rel: "noopener noreferrer" } : {};
 }
 
+export function distributeToColumns(stories: DisplayStory[], columnCount: number): DisplayStory[][] {
+  const columns: DisplayStory[][] = Array.from({ length: columnCount }, () => []);
+  stories.forEach((story, index) => {
+    columns[index % columnCount].push(story);
+  });
+  return columns;
+}
+
 export function buildStoryLayout(cmsStories: CmsStory[]) {
   const cmsLeftStories = sortNewestFirst(cmsStories.filter((story) => story.placement === "left"));
   const cmsRightStories = sortNewestFirst(cmsStories.filter((story) => story.placement === "right" || story.placement === "top" || story.placement === "trending"));
@@ -52,14 +60,16 @@ export function buildStoryLayout(cmsStories: CmsStory[]) {
   const activeRightStories = rightPool.slice(0, 6);
   const sideOverflow = [...leftPool.slice(6), ...rightPool.slice(6)];
   const activeChaosPool = sortNewestFirst([...sideOverflow, ...cmsChaosStories]);
-  const activeChaosStories = activeChaosPool.slice(0, HOMEPAGE_CHAOS_LIMIT);
+  const activeChaosPoolLimited = activeChaosPool.slice(0, HOMEPAGE_CHAOS_LIMIT);
   const moreFaceStories = activeChaosPool.slice(HOMEPAGE_CHAOS_LIMIT, HOMEPAGE_CHAOS_LIMIT + MORE_FACE_LIMIT);
+  const activeChaosColumns = distributeToColumns(activeChaosPoolLimited, 4);
 
   return {
     activeMainStory,
     activeLeftLinks,
     activeRightStories,
-    activeChaosStories,
+    activeChaosStories: activeChaosPoolLimited,
+    activeChaosColumns,
     moreFaceStories,
   };
 }
