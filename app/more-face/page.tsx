@@ -1,11 +1,11 @@
 import { Header } from "@/components/Header";
 import { getCmsStories } from "@/lib/sanity";
-import { buildStoryLayout, externalLinkProps, distributeToColumns } from "@/lib/storyLayout";
+import { buildStoryLayout, externalLinkProps, distributeToColumnsWithImageConstraint } from "@/lib/storyLayout";
 
 export default async function MoreFacePage() {
   const cmsStories = await getCmsStories();
   const { moreFaceStories } = buildStoryLayout(cmsStories);
-  const moreFaceColumns = distributeToColumns(moreFaceStories, 4);
+  const moreFaceColumns = distributeToColumnsWithImageConstraint(moreFaceStories, 4);
 
   return (
     <main id="top" className="min-h-screen bg-white text-black">

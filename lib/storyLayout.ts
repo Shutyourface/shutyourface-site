@@ -38,6 +38,48 @@ export function distributeToColumns(stories: DisplayStory[], columnCount: number
   return columns;
 }
 
+export function distributeToColumnsWithImageConstraint(stories: DisplayStory[], columnCount: number): DisplayStory[][] {
+  const columns: DisplayStory[][] = Array.from({ length: columnCount }, () => []);
+  const rowHasImage: boolean[] = [];
+
+  for (const story of stories) {
+    const hasImage = !!story.imageUrl && !story.imageHidden;
+    let placed = false;
+
+    for (let row = 0; row < 100; row++) {
+      const colForThisRow = row % columnCount;
+      const targetColumn = columns[colForThisRow];
+
+      // Check if this row already has this many stories in this column
+      if (targetColumn.length <= row) {
+        // Row exists in this column (or is being created)
+        const rowAlreadyHasImage = rowHasImage[row] || false;
+
+        if (hasImage && rowAlreadyHasImage) {
+          // Can't place image here, try next row
+          continue;
+        }
+
+        // Place the story
+        targetColumn.push(story);
+        if (hasImage) {
+          rowHasImage[row] = true;
+        }
+        placed = true;
+        break;
+      }
+    }
+
+    if (!placed) {
+      // Fallback: just append to shortest column
+      const shortestCol = columns.reduce((min, col, i) => col.length < columns[min].length ? i : min, 0);
+      columns[shortestCol].push(story);
+    }
+  }
+
+  return columns;
+}
+
 export function buildStoryLayout(cmsStories: CmsStory[]) {
   const cmsLeftStories = sortNewestFirst(cmsStories.filter((story) => story.placement === "left"));
   const cmsRightStories = sortNewestFirst(cmsStories.filter((story) => story.placement === "right" || story.placement === "top" || story.placement === "trending"));
@@ -62,7 +104,7 @@ export function buildStoryLayout(cmsStories: CmsStory[]) {
   const activeChaosPool = sortNewestFirst([...sideOverflow, ...cmsChaosStories]);
   const activeChaosPoolLimited = activeChaosPool.slice(0, HOMEPAGE_CHAOS_LIMIT);
   const moreFaceStories = activeChaosPool.slice(HOMEPAGE_CHAOS_LIMIT, HOMEPAGE_CHAOS_LIMIT + MORE_FACE_LIMIT);
-  const activeChaosColumns = distributeToColumns(activeChaosPoolLimited, 4);
+  const activeChaosColumns = distributeToColumnsWithImageConstraint(activeChaosPoolLimited, 4);
 
   return {
     activeMainStory,
