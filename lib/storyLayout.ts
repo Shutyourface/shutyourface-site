@@ -30,6 +30,27 @@ export function externalLinkProps(url?: string) {
   return url ? { target: "_blank", rel: "noopener noreferrer" } : {};
 }
 
+export function getChaosStyles(storyId: string, featured: boolean): { fontSize: string; margin: string; italic: boolean; red: boolean; underline: boolean; } {
+  // Stable hash based on story ID
+  const hash = storyId.split("").reduce((acc, char) => (acc * 31 + char.charCodeAt(0)) >>> 0, 0);
+
+  if (featured) {
+    return { fontSize: "text-3xl", margin: "mb-8", italic: true, red: true, underline: true };
+  }
+
+  // Use hash to pick styles
+  const sizes = ["text-xs", "text-sm", "text-base", "text-lg", "text-xl", "text-2xl"];
+  const margins = ["mb-2", "mb-3", "mb-4", "mb-5", "mb-6", "mb-8", "mb-10"];
+
+  return {
+    fontSize: sizes[hash % sizes.length],
+    margin: margins[(hash >> 4) % margins.length],
+    italic: (hash >> 8) % 3 === 0, // 1/3 chance italic
+    red: (hash >> 12) % 5 === 0, // 1/5 chance red text
+    underline: (hash >> 16) % 2 === 0, // 1/2 chance underline
+  };
+}
+
 export function distributeToColumns(stories: DisplayStory[], columnCount: number): DisplayStory[][] {
   const columns: DisplayStory[][] = Array.from({ length: columnCount }, () => []);
   stories.forEach((story, index) => {

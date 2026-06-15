@@ -1,7 +1,7 @@
 import { Header } from "@/components/Header";
 import { MailchimpSignup } from "@/components/MailchimpSignup";
 import { getCmsStories } from "@/lib/sanity";
-import { buildStoryLayout, externalLinkProps } from "@/lib/storyLayout";
+import { buildStoryLayout, externalLinkProps, getChaosStyles } from "@/lib/storyLayout";
 
 export default async function Home() {
   const cmsStories = await getCmsStories();
@@ -61,14 +61,17 @@ export default async function Home() {
         <section className="mt-5 flex gap-5 items-start">
           {activeChaosColumns.map((column, colIndex) => (
             <div key={colIndex} className="flex-1">
-              {column.map((story) => (
-                <a key={story._id || story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${story.featured ? "text-3xl" : "text-lg"} mb-5 block font-black uppercase leading-tight underline decoration-2 hover:bg-red-700 hover:text-white`}>
-                  {story.imageUrl && !story.imageHidden ? (
-                    <img src={story.imageUrl} alt="" className="mb-2 h-48 w-full border-2 border-black object-cover object-[center_20%] grayscale contrast-125" loading="lazy" />
-                  ) : null}
-                  {story.headline}
-                </a>
-              ))}
+              {column.map((story) => {
+                const chaos = getChaosStyles(story._id || story.headline, !!story.featured);
+                return (
+                  <a key={story._id || story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${chaos.fontSize} ${chaos.margin} ${chaos.red ? "text-red-700" : ""} ${chaos.italic ? "italic" : ""} ${chaos.underline ? "underline decoration-2" : ""} block font-black uppercase leading-tight hover:bg-red-700 hover:text-white`}>
+                    {story.imageUrl && !story.imageHidden ? (
+                      <img src={story.imageUrl} alt="" className="mb-2 h-48 w-full border-2 border-black object-cover object-[center_20%] grayscale contrast-125" loading="lazy" />
+                    ) : null}
+                    {story.headline}
+                  </a>
+                );
+              })}
             </div>
           ))}
         </section>
