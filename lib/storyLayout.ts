@@ -51,7 +51,7 @@ export function buildStoryLayout(cmsStories: CmsStory[]) {
   const activeLeftLinks = leftPool.slice(0, 6);
   const activeRightStories = rightPool.slice(0, 6);
   const sideOverflow = [...leftPool.slice(6), ...rightPool.slice(6)];
-  const activeChaosPool = stableRandomizeChaos([...sideOverflow, ...cmsChaosStories]);
+  const activeChaosPool = sortNewestFirst([...sideOverflow, ...cmsChaosStories]);
   const activeChaosStories = activeChaosPool.slice(0, HOMEPAGE_CHAOS_LIMIT);
   const moreFaceStories = activeChaosPool.slice(HOMEPAGE_CHAOS_LIMIT, HOMEPAGE_CHAOS_LIMIT + MORE_FACE_LIMIT);
 
