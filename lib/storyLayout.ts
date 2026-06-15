@@ -59,6 +59,19 @@ export function distributeToColumns(stories: DisplayStory[], columnCount: number
   return columns;
 }
 
+export function distributeToColumnsBalanced(stories: DisplayStory[], columnCount: number): DisplayStory[][] {
+  const columns: DisplayStory[][] = Array.from({ length: columnCount }, () => []);
+
+  for (const story of stories) {
+    // Find the shortest column
+    const shortestIndex = columns.reduce((minIdx, col, i) =>
+      col.length < columns[minIdx].length ? i : minIdx, 0);
+    columns[shortestIndex].push(story);
+  }
+
+  return columns;
+}
+
 export function distributeToColumnsWithImageConstraint(stories: DisplayStory[], columnCount: number): DisplayStory[][] {
   const columns: DisplayStory[][] = Array.from({ length: columnCount }, () => []);
   const rowHasImage: boolean[] = [];
@@ -125,7 +138,7 @@ export function buildStoryLayout(cmsStories: CmsStory[]) {
   const activeChaosPool = sortNewestFirst([...sideOverflow, ...cmsChaosStories]);
   const activeChaosPoolLimited = activeChaosPool.slice(0, HOMEPAGE_CHAOS_LIMIT);
   const moreFaceStories = activeChaosPool.slice(HOMEPAGE_CHAOS_LIMIT, HOMEPAGE_CHAOS_LIMIT + MORE_FACE_LIMIT);
-  const activeChaosColumns = distributeToColumns(activeChaosPoolLimited, 4);
+  const activeChaosColumns = distributeToColumnsBalanced(activeChaosPoolLimited, 4);
 
   return {
     activeMainStory,
