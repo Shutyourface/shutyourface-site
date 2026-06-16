@@ -28,7 +28,7 @@ export default async function Home() {
               <>
                 {activeMainStory.imageUrl && !activeMainStory.imageHidden ? (
                   <div className="aspect-[16/10] overflow-hidden border border-zinc-300 bg-zinc-200">
-                    <img src={activeMainStory.imageUrl} alt="" className="h-full w-full object-cover object-top grayscale contrast-125" loading="eager" />
+                    <img src={activeMainStory.imageUrl} alt="" className="h-full w-full object-cover object-top" loading="eager" />
                   </div>
                 ) : null}
                 <a href={activeMainStory.url || "#"} {...externalLinkProps(activeMainStory.url)} className="mt-3 block font-tabloid text-4xl uppercase leading-none tracking-tight text-red-700 hover:text-black md:text-6xl">
