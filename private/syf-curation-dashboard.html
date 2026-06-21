@@ -644,6 +644,30 @@ const CATEGORY_BOOSTS = {
 
 const HEAT_TERMS = new Set(['breaking','urgent','exclusive','live','resigns','resign','dies','dead','death','arrested','charged','convicted','guilty','lawsuit','ban','banned','crisis','chaos','shock','shocking','bombshell','explodes','collapse','war','attack','shooting','scandal','probe','investigation','warning','recall','viral','reveals','exposed']);
 
+// ── SYF BRAND SCORING SIGNALS ──
+
+const SHOCK_VERBS = ['says','claims','admits','reveals','exposes','drops','calls out','accuses','blasts','slams','rips','fires back','warns','threatens','defends','denies','walks back','backtracks','doubles down','lashes out','goes off on','mocks','torches','destroys','humiliates','embarrasses','demands','refuses','confirms','denies','rejects','blames','praises','endorses','attacks'];
+
+const KNOWN_FIGURES = new Set(['trump','biden','obama','harris','clinton','pelosi','musk','bezos','zuckerberg','swift','beyonce','kardashian','west','kanye','drake','rihanna','desantis','newsom','putin','zelensky','netanyahu','mcconnell','schumer','pence','aoc','ocasio-cortez','lebron','james','brady','mahomes','gates','cook','altman','jenner','oprah','fauci','giuliani','bannon','rubio','cruz','warren','sanders','johnson','macron','sunak','erdogan','modi','trudeau','depp','heard','diddy','combs','winfrey','elon','ronaldo','messi','bieber','grande','gomez','spears','madonna','adele','cuomo','hannity','carlson','maddow','shapiro','gaetz','greene','jordan','mccarthy','jeffries','fetterman','abbott','haley','kennedy','rfk','ramaswamy','vivek','patel','xi','kim','prince','harry','meghan','charles','williams','serena','tiger','woods','curry','durant','jackson','allen','murray','federer','djokovic','nadal','rapinoe','biles','simone','dwayne','johnson','rock','clooney','pitt','jolie','aniston','jennifer','kim k','cardi b','nicki','minaj','jay-z','jay z','lizzo','doja','lil','nas','asap','rocky','snoop','eminem','mariah','carey','houston','whitney','prince','michael jackson','diana','charles','kate','william','george','harry','sussex','cambridge','royal']);
+
+const CONFLICT_VERBS = [' vs ',' v ',' slams ',' blasts ',' accuses ',' rips ',' torches ',' calls out ',' goes after ',' attacks ',' hits back ',' fires back ',' clashes with ',' feuds with ',' spars with ',' confronts ',' bashes ',' trashes ',' destroys ',' humiliates ',' mocks ',' trolls '];
+
+const STARK_NUMBER_PATTERNS = [
+  /\b\d+\s*(dead|killed|deaths|death toll|wounded|injured|missing|arrested|charged|indicted|executed)\b/i,
+  /\$[\d,.]+\s*(million|billion|trillion)/i,
+  /\b[\d,.]+\s*(million|billion|trillion)\s*(dollar|dollar)/i,
+  /\b\d+[\d,.]*\s*%/,
+  /\b\d+\s*years?\s*(in prison|sentence|jail|behind bars|probation)/i,
+  /\b(hundreds|thousands|millions)\s*of\s*(people|cases|victims|migrants|troops|soldiers)\b/i,
+  /\b\d{2,}\s*(people|cases|victims|patients|migrants|soldiers|troops|children|babies)\b/i,
+];
+
+const BODY_HORROR_TERMS = ['flesh-eating','flesh eating','maggot','parasite','worm','infestation','rotting','decompos','autopsy','severed','dismember','decapitat','cannibal','toxic','poisoned','contaminated','outbreak','epidemic','plague','flesh','brain-eating','brain eating','infected','tumor','cancer','overdose','fentanyl','opioid','disease spreading','virus spread','bird flu','ebola','anthrax','rabies','recall','food safety','food poisoning','e. coli','salmonella','listeria','flesh wound'];
+
+const ABSURDIST_LOCAL_TERMS = ['florida man','florida woman','florida teen','florida cop','texas man','texas woman','man arrested for','woman arrested for','charged with stealing','stole from','broke into','drove into','ran into','threw','swallowed','found inside','discovered in','caught with','smuggled','escaped from','climbed','bit officer','chased by','attacked by','robot','squirrel','raccoon','alligator','gator','python','snake','drunk','naked','clown','sword','machete','chainsaw','crossbow','lawnmower','duct tape','zip tie','dumpster','porta potty','mcdonalds','walmart parking','gas station','waffle house','ihop','denny'];
+
+const PRESS_RELEASE_TERMS = ['talks continue','officials discuss','holds meeting','announces plans','releases statement','announces initiative','announces new','unveils plan','provides update','gives briefing','holds briefing','addresses concern','reaffirms commitment','underscores importance','highlights need','calls for dialogue','seeks to','aims to','looks to boost','works toward','moves forward','takes steps','pledges to','vows to continue','signs executive','signs legislation','passes bill','budget proposal','fiscal year','quarterly earnings','revenue report','press conference scheduled','statement read in part'];
+
 // ── INIT ──
 window.onload = () => {
   if (config.projectId) document.getElementById('projectId').value = config.projectId;
@@ -898,15 +922,39 @@ function classifyStoryBadge(story) {
 function calculatePriorityScore(story, group) {
   const uniqueSources = [...new Set(group.map(s => s.source))];
   const sourceScore = Math.min(3, uniqueSources.reduce((sum, source) => sum + (SOURCE_WEIGHTS[source] || 1), 0) * 0.45);
-  const overlapScore = Math.min(2.5, Math.max(0, uniqueSources.length - 1) * 0.75);
+  // Source buzz demoted: good secondary signal but should not float dry policy stories
+  const overlapScore = Math.min(0.75, Math.max(0, uniqueSources.length - 1) * 0.2);
   const freshnessScore = getFreshnessScore(story.pubDate);
   const headlineScore = getHeadlineHeatScore(story.originalHeadline);
   const categoryScore = CATEGORY_BOOSTS[story.category] || 0.25;
   const trendScore = Math.min(2, story.trendMatches.length * 1.5);
   const badgeScore = story.badge.priority === 'high' ? 1.5 : story.badge.priority === 'mid' ? 0.75 : 0.25;
-  const rawScore = sourceScore + overlapScore + freshnessScore + headlineScore + categoryScore + trendScore;
 
-  return rawScore + badgeScore;
+  // SYF brand signals
+  const namedFigureScore = getNamedFigureVerbScore(story.originalHeadline);
+  const starkNumberScore = getStarkNumberScore(story.originalHeadline);
+  const conflictScore = getNamedConflictScore(story.originalHeadline);
+  const bodyHorrorScore = getBodyHorrorScore(story.originalHeadline);
+  const absurdistScore = getAbsurdistLocalScore(story.originalHeadline);
+  const pressReleasePenalty = getPressReleasePenalty(story.originalHeadline);
+
+  // Sub-scores + matched pattern labels for Best Picks split
+  story.syfHeroScore = namedFigureScore + starkNumberScore + conflictScore;
+  story.syfChaosScore = bodyHorrorScore + absurdistScore;
+  story.syfPatterns = [];
+  if (namedFigureScore >= 2.5) story.syfPatterns.push('👤 named figure + shock verb');
+  else if (namedFigureScore > 0) story.syfPatterns.push('📣 shock verb');
+  if (starkNumberScore > 0) story.syfPatterns.push('🔢 stark number');
+  if (conflictScore >= 1.5) story.syfPatterns.push('⚔️ named feud');
+  else if (conflictScore > 0) story.syfPatterns.push('⚔️ conflict');
+  if (bodyHorrorScore > 0) story.syfPatterns.push('☠️ body horror');
+  if (absurdistScore > 0) story.syfPatterns.push('🤡 absurdist local');
+  if (pressReleasePenalty < 0) story.syfPatterns.push('📋 press-release (−1.5)');
+
+  const baseScore = sourceScore + overlapScore + freshnessScore + headlineScore + categoryScore + trendScore + badgeScore;
+  const syfScore = namedFigureScore + starkNumberScore + conflictScore + bodyHorrorScore + absurdistScore + pressReleasePenalty;
+
+  return baseScore + syfScore;
 }
 
 function getFreshnessScore(date) {
@@ -923,6 +971,47 @@ function getHeadlineHeatScore(headline) {
   const words = headline.toLowerCase().replace(/[^a-z0-9 ]/g, '').split(' ');
   const matches = words.filter(word => HEAT_TERMS.has(word)).length;
   return Math.min(2, matches * 0.75);
+}
+
+// Pattern 1: Named public figure + shocking action verb
+function getNamedFigureVerbScore(headline) {
+  const lower = ' ' + headline.toLowerCase() + ' ';
+  const hasShockVerb = SHOCK_VERBS.some(v => lower.includes(' ' + v + ' ') || lower.includes(' ' + v + ':') || lower.includes(' ' + v + ','));
+  if (!hasShockVerb) return 0;
+  const hasKnownFigure = [...KNOWN_FIGURES].some(name => lower.includes(' ' + name + ' ') || lower.includes(' ' + name + "'") || lower.includes(' ' + name + ',') || lower.includes(' ' + name + ':'));
+  return hasKnownFigure ? 2.5 : 1.0;
+}
+
+// Pattern 2: Stark surprising number
+function getStarkNumberScore(headline) {
+  return STARK_NUMBER_PATTERNS.some(p => p.test(headline)) ? 2.0 : 0;
+}
+
+// Pattern 3: Named conflict / feud between two parties
+function getNamedConflictScore(headline) {
+  const lower = headline.toLowerCase();
+  const hasConflict = CONFLICT_VERBS.some(v => lower.includes(v));
+  if (!hasConflict) return 0;
+  const hasKnownFigure = [...KNOWN_FIGURES].some(name => lower.includes(name));
+  return hasKnownFigure ? 1.5 : 0.75;
+}
+
+// Pattern 4: Body horror / health scare
+function getBodyHorrorScore(headline) {
+  const lower = headline.toLowerCase();
+  return BODY_HORROR_TERMS.some(t => lower.includes(t)) ? 1.0 : 0;
+}
+
+// Pattern 5: Absurdist local / Only in America
+function getAbsurdistLocalScore(headline) {
+  const lower = headline.toLowerCase();
+  return ABSURDIST_LOCAL_TERMS.some(t => lower.includes(t)) ? 1.0 : 0;
+}
+
+// Pattern 7: Press-release / incremental process language — penalise
+function getPressReleasePenalty(headline) {
+  const lower = headline.toLowerCase();
+  return PRESS_RELEASE_TERMS.some(t => lower.includes(t)) ? -1.5 : 0;
 }
 
 function getTrendMatches(headline) {
@@ -956,9 +1045,8 @@ function renderFeed() {
   if (currentFilter.source !== 'all') stories = stories.filter(s => s.source === currentFilter.source);
   if (currentFilter.badge !== 'all' && currentFilter.badge !== 'best') stories = stories.filter(s => s.badge?.key === currentFilter.badge);
   if (currentFilter.badge === 'best') {
-    stories = stories
-      .sort((a, b) => b.priorityScore - a.priorityScore || b.pubDate - a.pubDate)
-      .slice(0, 25);
+    renderBestPicks(stories);
+    return;
   }
   if (currentFilter.trend) stories = stories.filter(s => s.trendMatches && s.trendMatches.length);
 
@@ -988,6 +1076,9 @@ function renderCard(story) {
   const trendHtml = story.trendMatches && story.trendMatches.length
     ? `<div class="trend-match">TREND MATCH: ${story.trendMatches.slice(0,3).join(', ').toUpperCase()}</div>`
     : '';
+  const patternsHtml = story.syfPatterns && story.syfPatterns.length
+    ? `<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px;">${story.syfPatterns.map(p => `<span style="font-size:9px;letter-spacing:1px;padding:2px 6px;border:1px solid ${p.includes('press-release') ? 'var(--muted2)' : 'rgba(255,204,0,0.4)'};color:${p.includes('press-release') ? 'var(--muted2)' : 'var(--yellow)'};font-family:'Oswald',sans-serif;">${p}</span>`).join('')}</div>`
+    : '';
 
   const rewrittenIndicator = story.rewritten
     ? `<div class="card-original">Original: ${story.originalHeadline}</div>`
@@ -1002,6 +1093,7 @@ function renderCard(story) {
       <div class="card-content">
         <div class="card-source">${story.source}${sourcesHtml}</div>
         <div class="card-headline" id="headline-${story.id}">${story.headline}</div>
+        ${patternsHtml}
         ${trendHtml}
         ${rewrittenIndicator}
         <div class="card-meta">${timeAgo} · ${story.category.toUpperCase()} · <a href="${story.url}" target="_blank" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--muted2);">VIEW STORY ↗</a></div>
@@ -1018,6 +1110,58 @@ function renderCard(story) {
     </div>
     ${story.published ? '<div style="padding:6px 0 0;font-size:10px;letter-spacing:2px;color:var(--green);">✓ PUBLISHED TO SANITY</div>' : ''}
   </div>`;
+}
+
+function renderBestPicks(stories) {
+  const sorted = [...stories].sort((a, b) => b.priorityScore - a.priorityScore);
+
+  const heroLeads = sorted
+    .filter(s => (s.syfHeroScore || 0) >= 1.5)
+    .slice(0, 15);
+
+  // Chaos candidates: score high on wild patterns and not already in hero list
+  const heroIds = new Set(heroLeads.map(s => s.id));
+  const chaosWild = sorted
+    .filter(s => (s.syfChaosScore || 0) >= 1.0 && !heroIds.has(s.id))
+    .slice(0, 15);
+
+  // If hero list is thin, backfill with top overall non-chaos stories
+  const chaosIds = new Set(chaosWild.map(s => s.id));
+  const backfill = heroLeads.length < 6
+    ? sorted.filter(s => !heroIds.has(s.id) && !chaosIds.has(s.id)).slice(0, 8 - heroLeads.length)
+    : [];
+
+  const allHero = [...heroLeads, ...backfill];
+  const allChaos = chaosWild.length
+    ? chaosWild
+    : sorted.filter(s => !heroIds.has(s.id)).slice(0, 10);
+
+  if (!allHero.length && !allChaos.length) {
+    document.getElementById('story-feed').innerHTML = `<div class="empty-state"><h2>NO STORIES</h2><p style="font-size:12px;letter-spacing:1px;">Refresh feed first</p></div>`;
+    return;
+  }
+
+  let html = '';
+
+  if (allHero.length) {
+    html += `
+      <div style="margin-bottom:16px;padding:10px 0 8px;border-bottom:2px solid var(--yellow);display:flex;align-items:baseline;gap:12px;">
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--yellow);">★ BEST HERO / LEAD CANDIDATES</span>
+        <span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Oswald',sans-serif;">NAMED FIGURES · NUMBERS · FEUDS — ${allHero.length} stories</span>
+      </div>`;
+    html += allHero.map(s => renderCard(s)).join('');
+  }
+
+  if (allChaos.length) {
+    html += `
+      <div style="margin:28px 0 16px;padding:10px 0 8px;border-bottom:2px solid var(--accent2);display:flex;align-items:baseline;gap:12px;">
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--accent2);">⚡ BEST CHAOS / WILD CANDIDATES</span>
+        <span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Oswald',sans-serif;">BODY HORROR · WEIRD LOCAL · ABSURDIST — ${allChaos.length} stories</span>
+      </div>`;
+    html += allChaos.map(s => renderCard(s)).join('');
+  }
+
+  document.getElementById('story-feed').innerHTML = html;
 }
 
 function getTimeAgo(date) {
