@@ -51,6 +51,18 @@ export function getChaosStyles(storyId: string, featured: boolean): { fontSize: 
   };
 }
 
+export function reorderForColumns(stories: DisplayStory[], numCols: number): DisplayStory[] {
+  const numRows = Math.ceil(stories.length / numCols);
+  const result: DisplayStory[] = [];
+  for (let col = 0; col < numCols; col++) {
+    for (let row = 0; row < numRows; row++) {
+      const idx = row * numCols + col;
+      if (idx < stories.length) result.push(stories[idx]);
+    }
+  }
+  return result;
+}
+
 export function distributeToColumns(stories: DisplayStory[], columnCount: number): DisplayStory[][] {
   const columns: DisplayStory[][] = Array.from({ length: columnCount }, () => []);
   stories.forEach((story, index) => {
@@ -144,7 +156,7 @@ export function buildStoryLayout(cmsStories: CmsStory[]) {
     activeMainStory,
     activeLeftLinks,
     activeRightStories,
-    activeChaosStories: activeChaosPoolLimited,
+    activeChaosStories: reorderForColumns(activeChaosPoolLimited, 4),
     activeChaosColumns,
     moreFaceStories,
   };
