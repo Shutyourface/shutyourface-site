@@ -156,7 +156,7 @@ export function buildStoryLayout(cmsStories: CmsStory[]) {
     activeMainStory,
     activeLeftLinks,
     activeRightStories,
-    activeChaosStories: reorderForColumns(activeChaosPoolLimited, 4),
+    activeChaosStories: activeChaosPoolLimited,
     activeChaosColumns,
     moreFaceStories,
   };
