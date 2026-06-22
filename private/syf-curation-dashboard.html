@@ -942,14 +942,10 @@ function calculatePriorityScore(story, group) {
   story.syfHeroScore = namedFigureScore + starkNumberScore + conflictScore;
   story.syfChaosScore = bodyHorrorScore + absurdistScore;
   story.syfPatterns = [];
-  if (namedFigureScore >= 2.5) story.syfPatterns.push('👤 named figure + shock verb');
-  else if (namedFigureScore > 0) story.syfPatterns.push('📣 shock verb');
-  if (starkNumberScore > 0) story.syfPatterns.push('🔢 stark number');
-  if (conflictScore >= 1.5) story.syfPatterns.push('⚔️ named feud');
-  else if (conflictScore > 0) story.syfPatterns.push('⚔️ conflict');
-  if (bodyHorrorScore > 0) story.syfPatterns.push('☠️ body horror');
-  if (absurdistScore > 0) story.syfPatterns.push('🤡 absurdist local');
-  if (pressReleasePenalty < 0) story.syfPatterns.push('📋 press-release (−1.5)');
+  if (namedFigureScore > 0 || conflictScore > 0) story.syfPatterns.push('🔥 Stop and Stare');
+  if (starkNumberScore > 0) story.syfPatterns.push('📈 Numbers Hit Different');
+  if (bodyHorrorScore > 0 || absurdistScore > 0) story.syfPatterns.push('😬 WTF Factor');
+  if (pressReleasePenalty < 0) story.syfPatterns.push('📋 Process Story');
 
   const baseScore = sourceScore + overlapScore + freshnessScore + headlineScore + categoryScore + trendScore + badgeScore;
   const syfScore = namedFigureScore + starkNumberScore + conflictScore + bodyHorrorScore + absurdistScore + pressReleasePenalty;
@@ -1077,7 +1073,7 @@ function renderCard(story) {
     ? `<div class="trend-match">TREND MATCH: ${story.trendMatches.slice(0,3).join(', ').toUpperCase()}</div>`
     : '';
   const patternsHtml = story.syfPatterns && story.syfPatterns.length
-    ? `<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px;">${story.syfPatterns.map(p => `<span style="font-size:9px;letter-spacing:1px;padding:2px 6px;border:1px solid ${p.includes('press-release') ? 'var(--muted2)' : 'rgba(255,204,0,0.4)'};color:${p.includes('press-release') ? 'var(--muted2)' : 'var(--yellow)'};font-family:'Oswald',sans-serif;">${p}</span>`).join('')}</div>`
+    ? `<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px;">${story.syfPatterns.map(p => `<span style="font-size:9px;letter-spacing:1px;padding:2px 6px;border:1px solid ${p.includes('Process Story') ? 'var(--muted2)' : 'rgba(255,204,0,0.4)'};color:${p.includes('Process Story') ? 'var(--muted2)' : 'var(--yellow)'};font-family:'Oswald',sans-serif;">${p}</span>`).join('')}</div>`
     : '';
 
   const rewrittenIndicator = story.rewritten
