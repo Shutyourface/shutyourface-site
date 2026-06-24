@@ -1,17 +1,38 @@
 import { Header } from "@/components/Header";
 import { MailchimpSignup } from "@/components/MailchimpSignup";
-import { getCmsStories } from "@/lib/sanity";
+import { getCmsStories, getSiteSettings, hasHistoryPage, getHomepageFeaturedHistoryStory, getTodayHistoryDate } from "@/lib/sanity";
 import { buildStoryLayout, externalLinkProps } from "@/lib/storyLayout";
 
 export default async function Home() {
-  const cmsStories = await getCmsStories();
   const xProfileUrl = process.env.NEXT_PUBLIC_X_PROFILE_URL || "https://x.com/SYF_News";
+  const todayDate = getTodayHistoryDate();
+  const [cmsStories, settings] = await Promise.all([getCmsStories(), getSiteSettings()]);
   const { activeMainStory, activeLeftLinks, activeRightStories, activeChaosStories, moreFaceStories } = buildStoryLayout(cmsStories);
+
+  let historyExists = false;
+  let featuredHistoryStory = null;
+  if (settings.historyFeatureLive) {
+    [historyExists, featuredHistoryStory] = await Promise.all([
+      hasHistoryPage(todayDate),
+      getHomepageFeaturedHistoryStory(todayDate),
+    ]);
+  }
+  const showHistoryToggle = settings.historyFeatureLive && historyExists;
 
   return (
     <main id="top" className="min-h-screen bg-white text-black">
       <Header />
       <div className="mx-auto max-w-[1500px] px-3 py-4">
+        {showHistoryToggle && (
+          <div className="mb-5 flex border-2 border-black">
+            <span className="flex-1 bg-black px-4 py-2 text-center font-tabloid text-xl uppercase text-white">
+              Today&apos;s News
+            </span>
+            <a href={`/history/${todayDate}`} className="flex-1 px-4 py-2 text-center font-tabloid text-xl uppercase hover:bg-red-700 hover:text-white">
+              On This Day →
+            </a>
+          </div>
+        )}
         <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1.6fr)_360px]">
           <section className="space-y-3 text-lg font-black uppercase leading-tight">
             {activeLeftLinks.map((story, index) => (
@@ -58,6 +79,18 @@ export default async function Home() {
         <div className="mt-7 border-y-4 border-black py-3 text-center font-tabloid text-3xl uppercase leading-none md:text-5xl">
           No sections. No mercy. Just the hits.
         </div>
+        {showHistoryToggle && featuredHistoryStory && (
+          <a href={`/history/${todayDate}`} className="mt-5 flex items-start gap-4 border-l-4 border-red-700 pl-4 hover:opacity-80">
+            {featuredHistoryStory.imageUrl && !featuredHistoryStory.imageHidden ? (
+              <img src={featuredHistoryStory.imageUrl} alt="" className="h-16 w-24 flex-shrink-0 border border-zinc-200 object-cover grayscale contrast-125" loading="lazy" />
+            ) : null}
+            <div>
+              <p className="font-mono text-xs font-black uppercase tracking-[0.2em] text-red-700">📅 On This Day</p>
+              <p className="font-tabloid text-2xl uppercase leading-tight">{featuredHistoryStory.headline}</p>
+              {featuredHistoryStory.year ? <p className="font-mono text-xs text-zinc-400">{featuredHistoryStory.year}</p> : null}
+            </div>
+          </a>
+        )}
         <section className="mt-5 grid grid-cols-4 items-start gap-5">
           {[0, 1, 2, 3].map((col) => (
             <div key={col} className="flex flex-col gap-5">

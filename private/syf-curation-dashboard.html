@@ -406,6 +406,49 @@
     .manager-delete { border-color: var(--accent) !important; color: var(--accent) !important; }
     .manager-empty { color: var(--muted); font-size: 12px; letter-spacing: 1px; padding: 18px 0; }
 
+    /* ── TAB BAR ── */
+    .tab-bar { background: #000; border-bottom: 2px solid var(--border); display: flex; padding: 0 24px; gap: 4px; }
+    .tab-btn {
+      font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase; padding: 10px 20px;
+      background: none; border: none; border-bottom: 3px solid transparent;
+      color: var(--muted); cursor: pointer; transition: all 0.15s;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: #fff; border-bottom-color: var(--accent); }
+
+    /* ── HISTORY TAB ── */
+    .history-controls {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 12px 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .history-date-input {
+      background: var(--surface2); border: 1px solid var(--border2); color: var(--text);
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 7px 10px;
+    }
+    .history-date-input:focus { outline: none; border-color: var(--accent); }
+    .history-feed {
+      padding: 16px 24px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;
+      max-height: calc(100vh - 156px); overflow-y: auto;
+    }
+    .history-card { background: var(--surface); border: 1px solid var(--border); padding: 12px; transition: border-color 0.15s; }
+    .history-card:hover { border-color: var(--border2); }
+    .history-card.h-published { border-left: 3px solid var(--green); opacity: 0.65; }
+    .hcard-year { font-family: 'Bebas Neue', sans-serif; font-size: 30px; color: var(--accent); letter-spacing: 1px; line-height: 1; margin-bottom: 6px; }
+    .hcard-image { width: 100%; height: 110px; object-fit: cover; border: 1px solid var(--border2); margin-bottom: 8px; display: block; }
+    .hcard-original { font-size: 11px; color: var(--muted); line-height: 1.5; margin-bottom: 8px; font-style: italic; }
+    .hcard-headline-input {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border2); color: var(--text);
+      font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 600; padding: 7px 8px;
+      margin-bottom: 8px; letter-spacing: 0.5px;
+    }
+    .hcard-headline-input:focus { outline: none; border-color: var(--accent); }
+    .hcard-feature { font-size: 10px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; display: flex; align-items: center; gap: 6px; margin-bottom: 10px; cursor: pointer; }
+    .hcard-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+    .history-empty { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--muted); }
+    .history-empty h2 { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; margin-bottom: 8px; color: var(--border2); }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
       .main { grid-template-columns: 1fr; }
@@ -426,6 +469,12 @@
     <button class="btn btn-secondary" onclick="refreshFeed()">⟳ REFRESH FEED</button>
     <button class="btn btn-primary" onclick="document.getElementById('config-panel').scrollIntoView()">⚙ CONFIG</button>
   </div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-feed-btn" onclick="switchTab('feed')">📰 RSS FEED</button>
+  <button class="tab-btn" id="tab-history-btn" onclick="switchTab('history')">🗓 ON THIS DAY</button>
 </div>
 
 <!-- CONFIG BAR -->
@@ -455,8 +504,25 @@
   <div id="published-story-list" class="manager-empty">Click refresh list to load previous stories.</div>
 </div>
 
+<!-- HISTORY TAB -->
+<div id="history-tab" style="display:none;">
+  <div class="history-controls">
+    <span class="config-label">Date</span>
+    <input type="date" class="history-date-input" id="history-date" />
+    <button class="btn btn-primary" onclick="fetchHistoryEvents()">🗓 FETCH ON THIS DAY</button>
+    <button class="btn btn-green" id="batch-rewrite-btn" onclick="batchRewriteHistory()" disabled>✦ AI REWRITE ALL</button>
+    <span id="history-status" style="font-size:11px;color:var(--muted);letter-spacing:1px;"></span>
+  </div>
+  <div id="history-feed" class="history-feed">
+    <div class="history-empty">
+      <h2>NO EVENTS LOADED</h2>
+      <p style="font-size:12px;letter-spacing:1px;">Pick a date and hit FETCH ON THIS DAY</p>
+    </div>
+  </div>
+</div>
+
 <!-- MAIN -->
-<div class="main">
+<div class="main" id="rss-main-view">
 
   <!-- SIDEBAR -->
   <div class="sidebar">
@@ -667,6 +733,228 @@ const BODY_HORROR_TERMS = ['flesh-eating','flesh eating','maggot','parasite','wo
 const ABSURDIST_LOCAL_TERMS = ['florida man','florida woman','florida teen','florida cop','texas man','texas woman','man arrested for','woman arrested for','charged with stealing','stole from','broke into','drove into','ran into','threw','swallowed','found inside','discovered in','caught with','smuggled','escaped from','climbed','bit officer','chased by','attacked by','robot','squirrel','raccoon','alligator','gator','python','snake','drunk','naked','clown','sword','machete','chainsaw','crossbow','lawnmower','duct tape','zip tie','dumpster','porta potty','mcdonalds','walmart parking','gas station','waffle house','ihop','denny'];
 
 const PRESS_RELEASE_TERMS = ['talks continue','officials discuss','holds meeting','announces plans','releases statement','announces initiative','announces new','unveils plan','provides update','gives briefing','holds briefing','addresses concern','reaffirms commitment','underscores importance','highlights need','calls for dialogue','seeks to','aims to','looks to boost','works toward','moves forward','takes steps','pledges to','vows to continue','signs executive','signs legislation','passes bill','budget proposal','fiscal year','quarterly earnings','revenue report','press conference scheduled','statement read in part'];
+
+// ── HISTORY STATE ──
+let historyEvents = [];
+let currentTab = 'feed';
+
+// ── TAB SWITCHING ──
+function switchTab(tab) {
+  currentTab = tab;
+  const rssView = document.getElementById('rss-main-view');
+  const historyView = document.getElementById('history-tab');
+  const storyManager = document.getElementById('story-manager');
+
+  if (tab === 'feed') {
+    rssView.style.display = '';
+    historyView.style.display = 'none';
+    storyManager.style.display = '';
+    document.getElementById('tab-feed-btn').classList.add('active');
+    document.getElementById('tab-history-btn').classList.remove('active');
+  } else {
+    rssView.style.display = 'none';
+    historyView.style.display = 'block';
+    storyManager.style.display = 'none';
+    document.getElementById('tab-feed-btn').classList.remove('active');
+    document.getElementById('tab-history-btn').classList.add('active');
+    // Default date to today if unset
+    const dateInput = document.getElementById('history-date');
+    if (!dateInput.value) {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      dateInput.value = `${yyyy}-${mm}-${dd}`;
+    }
+    // Enable rewrite btn only if claude key is set and events loaded
+    document.getElementById('batch-rewrite-btn').disabled = !config.claudeKey || historyEvents.length === 0;
+  }
+}
+
+// ── WIKIPEDIA FETCH ──
+async function fetchHistoryEvents() {
+  const dateValue = document.getElementById('history-date').value;
+  if (!dateValue) { showToast('SELECT A DATE FIRST', true); return; }
+
+  const parts = dateValue.split('-');
+  const month = parseInt(parts[1], 10);
+  const day = parseInt(parts[2], 10);
+
+  document.getElementById('history-feed').innerHTML = `
+    <div class="loading-state" style="grid-column:1/-1;">
+      <div class="loading-spinner"></div>
+      <div style="font-size:12px;letter-spacing:2px;">LOADING FROM WIKIPEDIA...</div>
+    </div>`;
+  document.getElementById('history-status').textContent = 'Loading...';
+
+  try {
+    const res = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/${month}/${day}`,
+      { headers: { 'Accept': 'application/json' } }
+    );
+    if (!res.ok) throw new Error(`Wikipedia returned ${res.status}`);
+
+    const data = await res.json();
+    const events = (data.events || []).sort((a, b) => b.year - a.year);
+
+    historyEvents = events.map(event => ({
+      year: event.year,
+      originalText: event.text || '',
+      imageUrl: event.pages?.[0]?.thumbnail?.source || '',
+      link: event.pages?.[0]?.content_urls?.desktop?.page || '',
+      headline: '',
+      featureOnHomepage: false,
+      published: false,
+    }));
+
+    renderHistoryCards();
+    document.getElementById('history-status').textContent = `${historyEvents.length} events loaded`;
+    document.getElementById('batch-rewrite-btn').disabled = !config.claudeKey || historyEvents.length === 0;
+    showToast(`${historyEvents.length} EVENTS LOADED`);
+  } catch (e) {
+    document.getElementById('history-feed').innerHTML = `
+      <div class="history-empty">
+        <h2>FETCH FAILED</h2>
+        <p style="font-size:12px;letter-spacing:1px;">${e.message}</p>
+      </div>`;
+    document.getElementById('history-status').textContent = 'Failed';
+    showToast(`FAILED: ${e.message}`, true);
+  }
+}
+
+// ── BATCH AI REWRITE ──
+async function batchRewriteHistory() {
+  if (!config.claudeKey) { showToast('ADD CLAUDE KEY FIRST', true); return; }
+  if (!historyEvents.length) { showToast('FETCH EVENTS FIRST', true); return; }
+
+  const btn = document.getElementById('batch-rewrite-btn');
+  btn.textContent = 'REWRITING...';
+  btn.disabled = true;
+  document.getElementById('history-status').textContent = `Generating ${historyEvents.length} headlines...`;
+
+  try {
+    const res = await fetch('/api/rewrite-batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        apiKey: config.claudeKey,
+        events: historyEvents.map((e, i) => ({ text: e.originalText, year: e.year, index: i })),
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Batch rewrite failed');
+
+    const headlines = data.headlines || [];
+    headlines.forEach((headline, i) => {
+      if (historyEvents[i]) {
+        historyEvents[i].headline = headline;
+        const input = document.getElementById(`hheadline-${i}`);
+        if (input) input.value = headline;
+      }
+    });
+
+    document.getElementById('history-status').textContent = `${headlines.length} headlines ready — review and publish`;
+    showToast(`✦ ${headlines.length} HEADLINES GENERATED`);
+  } catch (e) {
+    showToast(`REWRITE FAILED: ${e.message}`, true);
+  }
+
+  btn.textContent = '✦ AI REWRITE ALL';
+  btn.disabled = false;
+}
+
+// ── RENDER HISTORY CARDS ──
+function renderHistoryCards() {
+  const feed = document.getElementById('history-feed');
+  if (!historyEvents.length) {
+    feed.innerHTML = `<div class="history-empty"><h2>NO EVENTS</h2><p>No events found for this date.</p></div>`;
+    return;
+  }
+  feed.innerHTML = historyEvents.map((event, i) => `
+    <div class="history-card ${event.published ? 'h-published' : ''}" id="hcard-${i}">
+      <div class="hcard-year">${event.year}</div>
+      ${event.imageUrl ? `<img class="hcard-image" src="${escapeAttr(event.imageUrl)}" alt="" loading="lazy" onerror="this.style.display='none'" />` : ''}
+      <div class="hcard-original">${escapeHtml(event.originalText)}</div>
+      <input class="hcard-headline-input" id="hheadline-${i}" placeholder="AI headline will appear here after rewrite..." value="${escapeAttr(event.headline)}" />
+      <label class="hcard-feature">
+        <input type="checkbox" id="hfeature-${i}" onchange="historyEvents[${i}].featureOnHomepage = this.checked" ${event.featureOnHomepage ? 'checked' : ''} />
+        Feature on Homepage
+      </label>
+      <div class="hcard-actions">
+        <button class="placement-btn hero" onclick="publishHistoryStory(${i}, 'hero')">★ HERO</button>
+        <button class="placement-btn left" onclick="publishHistoryStory(${i}, 'left')">← LEFT</button>
+        <button class="placement-btn right" onclick="publishHistoryStory(${i}, 'right')">RIGHT →</button>
+        <button class="placement-btn chaos" onclick="publishHistoryStory(${i}, 'chaos')">CHAOS ⚡</button>
+      </div>
+      ${event.published ? '<div style="padding:6px 0 0;font-size:10px;letter-spacing:2px;color:var(--green);">✓ PUBLISHED TO SANITY</div>' : ''}
+    </div>
+  `).join('');
+}
+
+// ── PUBLISH HISTORY STORY ──
+async function publishHistoryStory(index, placement) {
+  if (!config.apiToken) { showToast('ADD SANITY CONFIG FIRST', true); return; }
+
+  const event = historyEvents[index];
+  if (!event) return;
+
+  const headline = document.getElementById(`hheadline-${index}`).value.trim();
+  if (!headline) { showToast('ADD A HEADLINE FIRST (click AI REWRITE ALL)', true); return; }
+
+  const featureOnHomepage = document.getElementById(`hfeature-${index}`).checked;
+  const dateValue = document.getElementById('history-date').value; // YYYY-MM-DD
+  const historyDate = dateValue.slice(5); // → MM-DD
+  const stableId = makeHistoryDocId(historyDate, event.originalText);
+
+  const doc = {
+    _type: 'historyStory',
+    _id: stableId,
+    historyDate: historyDate,
+    headline: headline,
+    url: event.link || '',
+    imageUrl: event.imageUrl || '',
+    imageHidden: !event.imageUrl,
+    year: event.year,
+    originalEvent: event.originalText,
+    placement: placement,
+    featureOnHomepage: featureOnHomepage,
+    isActive: true,
+    sortOrder: index,
+  };
+
+  try {
+    const res = await fetch('/api/sanity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-sanity-token': config.apiToken },
+      body: JSON.stringify({ token: config.apiToken, mutations: [{ createOrReplace: doc }] }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'Publish failed');
+
+    historyEvents[index].published = true;
+    historyEvents[index].featureOnHomepage = featureOnHomepage;
+    document.getElementById(`hcard-${index}`).classList.add('h-published');
+    showToast(`✓ PUBLISHED TO ${placement.toUpperCase()}`);
+  } catch (e) {
+    showToast(`PUBLISH FAILED: ${e.message || 'CHECK TOKEN'}`, true);
+  }
+}
+
+// ── HISTORY HELPERS ──
+function makeHistoryDocId(date, text) {
+  const str = 'hist|' + date + '|' + (text || '');
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return 'history-' + date.replace('-', '') + '-' + Math.abs(hash).toString(36).slice(0, 8);
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
 
 // ── INIT ──
 window.onload = () => {
