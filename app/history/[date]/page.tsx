@@ -69,7 +69,7 @@ export default async function HistoryPage({ params }: { params: { date: string }
                     {story.imageUrl && !story.imageHidden ? (
                       <img src={story.imageUrl} alt="" className="mb-2 h-auto w-full border-2 border-black object-cover grayscale contrast-125" loading="lazy" />
                     ) : null}
-                    {story.year ? <span className="block font-mono text-xs font-normal normal-case text-zinc-400">{story.year}</span> : null}
+                    {story.year ? <span className="block font-tabloid text-2xl text-red-700">{story.year}</span> : null}
                     {story.headline}
                   </a>
                 ))}
@@ -84,7 +84,7 @@ export default async function HistoryPage({ params }: { params: { date: string }
                         <img src={heroStory.imageUrl} alt="" className="h-full w-full object-cover object-top" loading="eager" />
                       </div>
                     ) : null}
-                    {heroStory.year ? <p className="mt-2 font-mono text-sm text-zinc-400">{heroStory.year}</p> : null}
+                    {heroStory.year ? <p className="mt-2 font-tabloid text-4xl text-red-700">{heroStory.year}</p> : null}
                     <a href={heroStory.url || "#"} {...externalLinkProps(heroStory.url)}
                        className="mt-2 block font-tabloid text-4xl uppercase leading-none tracking-tight text-red-700 hover:text-black md:text-6xl">
                       {heroStory.headline}
@@ -107,7 +107,7 @@ export default async function HistoryPage({ params }: { params: { date: string }
                       {story.imageUrl && !story.imageHidden ? (
                         <img src={story.imageUrl} alt="" className="mb-2 h-auto w-full border-2 border-black object-cover grayscale contrast-125" loading="lazy" />
                       ) : null}
-                      {story.year ? <span className="block font-mono text-xs font-normal normal-case text-zinc-400">{story.year}</span> : null}
+                      {story.year ? <span className="block font-tabloid text-2xl text-red-700">{story.year}</span> : null}
                       {story.headline}
                     </a>
                   ))}
@@ -130,7 +130,7 @@ export default async function HistoryPage({ params }: { params: { date: string }
                           {story.imageUrl && !story.imageHidden ? (
                             <img src={story.imageUrl} alt="" className="mb-2 h-32 w-full border-2 border-black object-cover object-[center_20%] grayscale contrast-125" loading="lazy" />
                           ) : null}
-                          {story.year ? <span className="block font-mono text-xs font-normal normal-case text-zinc-400">{story.year}</span> : null}
+                          {story.year ? <span className="block font-tabloid text-xl text-red-700">{story.year}</span> : null}
                           {story.headline}
                         </a>
                       ))}
