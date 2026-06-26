@@ -7,6 +7,9 @@ export type CmsStory = {
   imageHidden?: boolean;
   placement: "hero" | "main" | "left" | "right" | "top" | "trending" | "chaos";
   subheadline?: string;
+  secondaryLinkEnabled?: boolean;
+  secondaryLinkHeadline?: string;
+  secondaryLinkUrl?: string;
   featured?: boolean;
   publishedAt?: string;
   isActive?: boolean;
@@ -17,6 +20,9 @@ export type CmsHistoryStory = {
   historyDate: string;
   headline: string;
   subheadline?: string;
+  secondaryLinkEnabled?: boolean;
+  secondaryLinkHeadline?: string;
+  secondaryLinkUrl?: string;
   url?: string;
   imageUrl?: string;
   imageHidden?: boolean;
@@ -51,6 +57,9 @@ export async function getCmsStories(): Promise<CmsStory[]> {
       imageHidden,
       placement,
       subheadline,
+      secondaryLinkEnabled,
+      secondaryLinkHeadline,
+      secondaryLinkUrl,
       featured,
       publishedAt,
       isActive
@@ -95,8 +104,8 @@ export async function getHistoryStories(date: string): Promise<CmsHistoryStory[]
 
   const query = encodeURIComponent(
     `*[_type == "historyStory" && historyDate == "${date}" && isActive != false] | order(sortOrder asc, _createdAt asc) {
-      _id, historyDate, headline, subheadline, url, imageUrl, imageHidden,
-      year, originalEvent, placement, featureOnHomepage, isActive, sortOrder
+      _id, historyDate, headline, subheadline, secondaryLinkEnabled, secondaryLinkHeadline, secondaryLinkUrl,
+      url, imageUrl, imageHidden, year, originalEvent, placement, featureOnHomepage, isActive, sortOrder
     }`,
   );
 
@@ -117,8 +126,8 @@ export async function getHomepageFeaturedHistoryStory(date: string): Promise<Cms
 
   const query = encodeURIComponent(
     `*[_type == "historyStory" && historyDate == "${date}" && featureOnHomepage == true && isActive != false][0] {
-      _id, historyDate, headline, subheadline, url, imageUrl, imageHidden,
-      year, originalEvent, placement, featureOnHomepage
+      _id, historyDate, headline, subheadline, secondaryLinkEnabled, secondaryLinkHeadline, secondaryLinkUrl,
+      url, imageUrl, imageHidden, year, originalEvent, placement, featureOnHomepage
     }`,
   );
 

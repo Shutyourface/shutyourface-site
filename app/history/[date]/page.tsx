@@ -94,6 +94,11 @@ export default async function HistoryPage({ params }: { params: { date: string }
                         {heroStory.subheadline}
                       </p>
                     ) : null}
+                    {heroStory.secondaryLinkEnabled && heroStory.secondaryLinkHeadline ? (
+                      <a href={heroStory.secondaryLinkUrl || "#"} {...externalLinkProps(heroStory.secondaryLinkUrl)} className="mt-4 block border-2 border-black px-4 py-3 font-black uppercase leading-tight underline decoration-2 hover:bg-red-700 hover:text-white">
+                        {heroStory.secondaryLinkHeadline}
+                      </a>
+                    ) : null}
                   </>
                 ) : null}
               </section>

@@ -60,6 +60,11 @@ export default async function Home() {
                     {activeMainStory.subheadline}
                   </p>
                 ) : null}
+                {activeMainStory.secondaryLinkEnabled && activeMainStory.secondaryLinkHeadline ? (
+                  <a href={activeMainStory.secondaryLinkUrl || "#"} {...externalLinkProps(activeMainStory.secondaryLinkUrl)} className="mt-4 block border-2 border-black px-4 py-3 font-black uppercase leading-tight underline decoration-2 hover:bg-red-700 hover:text-white">
+                    {activeMainStory.secondaryLinkHeadline}
+                  </a>
+                ) : null}
               </>
             ) : null}
           </section>

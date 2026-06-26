@@ -64,6 +64,23 @@ export const historyStory = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: "secondaryLinkEnabled",
+      title: "Add Secondary Story Link",
+      description: "Show a boxed secondary link below the subheadline (hero placement only).",
+      type: "boolean",
+      initialValue: false,
+    }),
+    defineField({
+      name: "secondaryLinkHeadline",
+      title: "Secondary Link Headline",
+      type: "string",
+    }),
+    defineField({
+      name: "secondaryLinkUrl",
+      title: "Secondary Link URL",
+      type: "url",
+    }),
+    defineField({
       name: "featureOnHomepage",
       title: "Feature on Homepage",
       description: "Show this as a teaser on the main homepage.",

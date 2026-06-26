@@ -47,6 +47,23 @@ export const story = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: "secondaryLinkEnabled",
+      title: "Add Secondary Story Link",
+      description: "Show a boxed secondary link below the subheadline (hero placement only).",
+      type: "boolean",
+      initialValue: false,
+    }),
+    defineField({
+      name: "secondaryLinkHeadline",
+      title: "Secondary Link Headline",
+      type: "string",
+    }),
+    defineField({
+      name: "secondaryLinkUrl",
+      title: "Secondary Link URL",
+      type: "url",
+    }),
+    defineField({
       name: "featured",
       title: "Make Larger In Chaos Wall",
       type: "boolean",
