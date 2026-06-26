@@ -25,11 +25,11 @@ export default async function Home() {
       <Header />
       <div className="mx-auto max-w-[1500px] px-3 py-4">
         {showHistoryToggle && (
-          <div className="mb-5 flex border-2 border-black">
-            <span className="flex-1 bg-black px-4 py-3 text-center font-tabloid text-2xl uppercase text-white">
+          <div className="mb-5 flex w-fit border-2 border-black">
+            <span className="bg-black px-6 py-3 text-center font-tabloid text-2xl uppercase text-white">
               Today&apos;s News
             </span>
-            <a href={`/history/${todayDate}`} className="flex flex-1 items-center justify-center gap-2 bg-red-700 px-4 py-3 font-tabloid text-xl uppercase text-white hover:bg-red-800">
+            <a href={`/history/${todayDate}`} className="flex items-center gap-2 bg-red-700 px-6 py-3 font-tabloid text-xl uppercase text-white hover:bg-red-800">
               <span>⏱</span>
               <span>On This Day: {toggleDateLabel}</span>
               <span className="bg-yellow-400 px-1.5 py-0.5 font-mono text-xs font-black text-black">NEW</span>
