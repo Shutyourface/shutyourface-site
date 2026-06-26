@@ -25,7 +25,7 @@ export default async function Home() {
       <Header />
       <div className="mx-auto max-w-[1500px] px-3 py-4">
         {showHistoryToggle && (
-          <div className="mb-5 flex w-full gap-2">
+          <div className="mb-5 mx-auto flex w-full max-w-4xl gap-2">
             <span className="flex flex-1 items-center justify-center border-2 border-black bg-black py-3 text-center font-tabloid text-2xl uppercase text-white">
               Today&apos;s News
             </span>
