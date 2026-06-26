@@ -68,21 +68,9 @@ export default async function Home() {
               </>
             ) : null}
             {activeHero2Story ? (
-              <div className="mt-5 border-t-2 border-black pt-5">
-                {activeHero2Story.imageUrl && !activeHero2Story.imageHidden ? (
-                  <div className="aspect-[16/10] overflow-hidden border border-zinc-300 bg-zinc-200">
-                    <img src={activeHero2Story.imageUrl} alt="" className="h-full w-full object-cover object-top" loading="lazy" />
-                  </div>
-                ) : null}
-                <a href={activeHero2Story.url || "#"} {...externalLinkProps(activeHero2Story.url)} className="mt-2 block font-tabloid text-3xl uppercase leading-none tracking-tight text-red-700 hover:text-black md:text-4xl">
-                  {activeHero2Story.headline}
-                </a>
-                {activeHero2Story.subheadline ? (
-                  <p className="font-tabloid text-2xl uppercase italic leading-none tracking-tight md:text-3xl">
-                    {activeHero2Story.subheadline}
-                  </p>
-                ) : null}
-              </div>
+              <a href={activeHero2Story.url || "#"} {...externalLinkProps(activeHero2Story.url)} className="mt-4 block border-2 border-black px-4 py-3 font-black text-xl uppercase leading-tight underline decoration-2 hover:bg-red-700 hover:text-white">
+                {activeHero2Story.headline}
+              </a>
             ) : null}
           </section>
           <aside>

@@ -1390,16 +1390,12 @@ function renderCard(story) {
         <div class="card-meta">${timeAgo} · ${story.category.toUpperCase()} · <a href="${story.url}" target="_blank" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--muted2);">VIEW STORY ↗</a></div>
       </div>
     </div>
-    <div class="secondary-link-row" style="display:flex;gap:6px;padding:6px 0 4px;border-top:1px solid var(--border);margin-top:6px;">
-      <input class="secondary-link-input" id="sec-headline-${story.id}" placeholder="2nd link headline (hero only)" style="flex:1.5;" />
-      <input class="secondary-link-input" id="sec-url-${story.id}" placeholder="2nd link URL" style="flex:1;" />
-    </div>
     <div class="card-actions">
       <button class="placement-btn hero" onclick="publishStory('${story.id}', 'hero')">★ HERO</button>
-      <button class="placement-btn hero" onclick="publishStory('${story.id}', 'hero2')" style="opacity:0.7;">HERO 2</button>
       <button class="placement-btn left" onclick="publishStory('${story.id}', 'left')">← LEFT</button>
       <button class="placement-btn right" onclick="publishStory('${story.id}', 'right')">RIGHT →</button>
       <button class="placement-btn chaos" onclick="publishStory('${story.id}', 'chaos')">CHAOS ⚡</button>
+      <button class="placement-btn hero" onclick="publishStory('${story.id}', 'hero2')" style="opacity:0.7;">2ND HERO</button>
       <button class="rewrite-btn" id="rewrite-${story.id}" onclick="rewriteHeadline('${story.id}')" ${!config.claudeKey ? 'disabled title="Add Claude API key to enable"' : ''}>
         ${config.claudeKey ? '✦ AI REWRITE' : '✦ AI REWRITE (needs key)'}
       </button>
@@ -1656,23 +1652,14 @@ async function publishStory(storyId, placement) {
   const story = allStories.find(s => s.id === storyId);
   if (!story) return;
 
-  const secHeadline = (document.getElementById(`sec-headline-${storyId}`)?.value || '').trim();
-  const secUrl = (document.getElementById(`sec-url-${storyId}`)?.value || '').trim();
-  const hasSecondaryLink = placement === 'hero' && secHeadline.length > 0;
-
   const doc = {
     _type: 'story',
     headline: story.headline,
     url: story.url,
     placement: placement,
-    imageHidden: false,
+    imageHidden: true,
     publishedAt: new Date().toISOString(),
     isActive: true,
-    ...(hasSecondaryLink && {
-      secondaryLinkEnabled: true,
-      secondaryLinkHeadline: secHeadline,
-      secondaryLinkUrl: secUrl || undefined,
-    }),
   };
 
   try {
