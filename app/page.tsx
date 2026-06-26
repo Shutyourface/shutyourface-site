@@ -6,6 +6,7 @@ import { buildStoryLayout, externalLinkProps } from "@/lib/storyLayout";
 export default async function Home() {
   const xProfileUrl = process.env.NEXT_PUBLIC_X_PROFILE_URL || "https://x.com/SYF_News";
   const todayDate = getTodayHistoryDate();
+  const toggleDateLabel = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }).toUpperCase();
   const [cmsStories, settings] = await Promise.all([getCmsStories(), getSiteSettings()]);
   const { activeMainStory, activeHero2Story, activeLeftLinks, activeRightStories, activeChaosStories, moreFaceStories } = buildStoryLayout(cmsStories);
 
@@ -25,11 +26,14 @@ export default async function Home() {
       <div className="mx-auto max-w-[1500px] px-3 py-4">
         {showHistoryToggle && (
           <div className="mb-5 flex border-2 border-black">
-            <span className="flex-1 bg-black px-4 py-2 text-center font-tabloid text-xl uppercase text-white">
+            <span className="flex-1 bg-black px-4 py-3 text-center font-tabloid text-2xl uppercase text-white">
               Today&apos;s News
             </span>
-            <a href={`/history/${todayDate}`} className="flex-1 px-4 py-2 text-center font-tabloid text-xl uppercase hover:bg-red-700 hover:text-white">
-              On This Day →
+            <a href={`/history/${todayDate}`} className="flex flex-1 items-center justify-center gap-2 bg-red-700 px-4 py-3 font-tabloid text-xl uppercase text-white hover:bg-red-800">
+              <span>⏱</span>
+              <span>On This Day: {toggleDateLabel}</span>
+              <span className="bg-yellow-400 px-1.5 py-0.5 font-mono text-xs font-black text-black">NEW</span>
+              <span>→</span>
             </a>
           </div>
         )}
@@ -38,7 +42,7 @@ export default async function Home() {
             {activeLeftLinks.map((story, index) => (
               <a key={story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${index === 0 ? "text-red-700" : ""} block underline decoration-2 hover:bg-red-700 hover:text-white`}>
                 {story.imageUrl && !story.imageHidden ? (
-                  <img src={story.imageUrl} alt="" className="mb-2 h-auto w-full border-2 border-black object-cover grayscale contrast-125" loading="lazy" />
+                  <img src={story.imageUrl} alt="" className="mb-2 h-auto w-full border-2 border-black object-cover" loading="lazy" />
                 ) : null}
                 {story.headline}
               </a>
@@ -74,13 +78,13 @@ export default async function Home() {
             ) : null}
           </section>
           <aside>
-            <div className="space-y-3 text-lg font-black uppercase leading-tight">
+            <div className="space-y-3 font-black uppercase leading-tight">
               {activeRightStories.map((story) => (
-                <a key={story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className="block border-b-2 border-black pb-3 underline decoration-2 hover:bg-red-700 hover:text-white">
+                <a key={story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className="flex items-start gap-3 border-b-2 border-black pb-3 underline decoration-2 hover:bg-red-700 hover:text-white">
+                  <span className="flex-1 text-base">{story.headline}</span>
                   {story.imageUrl && !story.imageHidden ? (
-                    <img src={story.imageUrl} alt="" className="mb-2 h-auto w-full border-2 border-black object-cover grayscale contrast-125" loading="lazy" />
+                    <img src={story.imageUrl} alt="" className="h-16 w-20 flex-shrink-0 object-cover" loading="lazy" />
                   ) : null}
-                  {story.headline}
                 </a>
               ))}
             </div>
@@ -92,7 +96,7 @@ export default async function Home() {
         {showHistoryToggle && featuredHistoryStory && (
           <a href={`/history/${todayDate}`} className="mt-5 flex items-start gap-4 border-l-4 border-red-700 pl-4 hover:opacity-80">
             {featuredHistoryStory.imageUrl && !featuredHistoryStory.imageHidden ? (
-              <img src={featuredHistoryStory.imageUrl} alt="" className="h-16 w-24 flex-shrink-0 border border-zinc-200 object-cover grayscale contrast-125" loading="lazy" />
+              <img src={featuredHistoryStory.imageUrl} alt="" className="h-16 w-24 flex-shrink-0 border border-zinc-200 object-cover" loading="lazy" />
             ) : null}
             <div>
               <p className="font-mono text-xs font-black uppercase tracking-[0.2em] text-red-700">📅 On This Day</p>
@@ -107,7 +111,7 @@ export default async function Home() {
               {activeChaosStories.filter((_, i) => i % 4 === col).map((story) => (
                 <a key={story._id || story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${story.featured ? "text-3xl" : "text-lg"} block font-black uppercase leading-tight underline decoration-2 hover:bg-red-700 hover:text-white`}>
                   {story.imageUrl && !story.imageHidden ? (
-                    <img src={story.imageUrl} alt="" className="mb-2 h-32 w-full border-2 border-black object-cover object-[center_20%] grayscale contrast-125" loading="lazy" />
+                    <img src={story.imageUrl} alt="" className="mb-2 h-32 w-full object-cover object-[center_20%]" loading="lazy" />
                   ) : null}
                   {story.headline}
                 </a>
