@@ -83,7 +83,7 @@ export default async function Home() {
                 <a key={story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className="flex items-start gap-3 border-b-2 border-black pb-3 underline decoration-2 hover:bg-red-700 hover:text-white">
                   <span className="flex-1 text-base">{story.headline}</span>
                   {story.imageUrl && !story.imageHidden ? (
-                    <img src={story.imageUrl} alt="" className="h-16 w-20 flex-shrink-0 object-cover" loading="lazy" />
+                    <img src={story.imageUrl} alt="" className="h-20 w-28 flex-shrink-0 object-cover" loading="lazy" />
                   ) : null}
                 </a>
               ))}
