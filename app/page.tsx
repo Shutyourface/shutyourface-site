@@ -6,7 +6,7 @@ import { buildStoryLayout, externalLinkProps } from "@/lib/storyLayout";
 export default async function Home() {
   const xProfileUrl = process.env.NEXT_PUBLIC_X_PROFILE_URL || "https://x.com/SYF_News";
   const todayDate = getTodayHistoryDate();
-  const toggleDateLabel = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }).toUpperCase();
+  const toggleDateLabel = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" }).toUpperCase();
   const [cmsStories, settings] = await Promise.all([getCmsStories(), getSiteSettings()]);
   const { activeMainStory, activeHero2Story, activeLeftLinks, activeRightStories, activeChaosStories, moreFaceStories } = buildStoryLayout(cmsStories);
 
