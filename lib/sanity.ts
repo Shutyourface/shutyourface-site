@@ -5,7 +5,7 @@ export type CmsStory = {
   url?: string;
   imageUrl?: string;
   imageHidden?: boolean;
-  placement: "hero" | "main" | "left" | "right" | "top" | "trending" | "chaos";
+  placement: "hero" | "hero2" | "main" | "left" | "right" | "top" | "trending" | "chaos";
   subheadline?: string;
   secondaryLinkEnabled?: boolean;
   secondaryLinkHeadline?: string;

@@ -39,6 +39,7 @@ export const story = defineType({
       options: {
         list: [
           { title: "Hero", value: "hero" },
+          { title: "Hero 2", value: "hero2" },
           { title: "Left Side", value: "left" },
           { title: "Right Side", value: "right" },
           { title: "Chaos Wall", value: "chaos" },

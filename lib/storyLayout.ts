@@ -131,7 +131,9 @@ export function buildStoryLayout(cmsStories: CmsStory[]) {
   const cmsRightStories = sortNewestFirst(cmsStories.filter((story) => story.placement === "right" || story.placement === "top" || story.placement === "trending"));
   const cmsChaosStories = sortNewestFirst(cmsStories.filter((story) => story.placement === "chaos"));
   const cmsHeroStories = sortNewestFirst(cmsStories.filter((story) => story.placement === "hero" || story.placement === "main"));
+  const cmsHero2Stories = sortNewestFirst(cmsStories.filter((story) => story.placement === "hero2"));
   const cmsHeroStory = cmsHeroStories[0];
+  const activeHero2Story = cmsHero2Stories[0] ?? null;
   const olderHeroStories = cmsHeroStories.slice(1);
   const activeMainStory = cmsHeroStory
     ? {
@@ -157,6 +159,7 @@ export function buildStoryLayout(cmsStories: CmsStory[]) {
 
   return {
     activeMainStory,
+    activeHero2Story,
     activeLeftLinks,
     activeRightStories,
     activeChaosStories: activeChaosPoolLimited,
