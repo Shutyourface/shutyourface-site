@@ -25,7 +25,7 @@ export default async function Home() {
       <Header />
       <div className="mx-auto max-w-[1500px] px-3 py-4">
         {showHistoryToggle && (
-          <div className="mb-5 mx-auto flex w-full max-w-4xl gap-2">
+          <div className="mb-5 flex w-full gap-2">
             <span className="flex flex-1 items-center justify-center border-2 border-black bg-black py-3 text-center font-tabloid text-2xl uppercase text-white">
               Today&apos;s News
             </span>
@@ -78,13 +78,13 @@ export default async function Home() {
             ) : null}
           </section>
           <aside>
-            <div className="space-y-3 font-black uppercase leading-tight">
+            <div className="space-y-3 text-lg font-black uppercase leading-tight">
               {activeRightStories.map((story) => (
-                <a key={story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className="flex items-start gap-3 border-b-2 border-black pb-3 underline decoration-2 hover:bg-red-700 hover:text-white">
-                  <span className="flex-1 text-base">{story.headline}</span>
+                <a key={story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className="block border-b-2 border-black pb-3 underline decoration-2 hover:bg-red-700 hover:text-white">
                   {story.imageUrl && !story.imageHidden ? (
-                    <img src={story.imageUrl} alt="" className="h-24 w-32 flex-shrink-0 object-cover" loading="lazy" />
+                    <img src={story.imageUrl} alt="" className="mb-2 h-auto w-full object-cover" loading="lazy" />
                   ) : null}
+                  {story.headline}
                 </a>
               ))}
             </div>
