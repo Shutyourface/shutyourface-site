@@ -3,10 +3,13 @@ import { MailchimpSignup } from "@/components/MailchimpSignup";
 import { getCmsStories, getSiteSettings, hasHistoryPage, getHomepageFeaturedHistoryStory, getTodayHistoryDate } from "@/lib/sanity";
 import { buildStoryLayout, externalLinkProps } from "@/lib/storyLayout";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const xProfileUrl = process.env.NEXT_PUBLIC_X_PROFILE_URL || "https://x.com/SYF_News";
   const todayDate = getTodayHistoryDate();
-  const toggleDateLabel = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" }).toUpperCase();
+  const [m, d] = todayDate.split("-").map(Number);
+  const toggleDateLabel = new Date(2000, m - 1, d).toLocaleDateString("en-US", { month: "long", day: "numeric" }).toUpperCase();
   const [cmsStories, settings] = await Promise.all([getCmsStories(), getSiteSettings()]);
   const { activeMainStory, activeHero2Story, activeLeftLinks, activeRightStories, activeChaosStories, moreFaceStories } = buildStoryLayout(cmsStories);
 
