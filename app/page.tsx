@@ -30,12 +30,12 @@ export default async function Home() {
     <main id="top" className="min-h-screen bg-white text-black">
       <Header />
       <div className="mx-auto max-w-[1500px] px-3 py-4">
-        <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)_320px]">
+        <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1.6fr)_360px]">
           <section className="space-y-3 text-lg font-black uppercase leading-tight">
             {activeLeftLinks.map((story, index) => (
               <a key={story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${index === 0 ? "text-red-700" : ""} block underline decoration-2 hover:bg-red-700 hover:text-white`}>
                 {story.imageUrl && !story.imageHidden ? (
-                  <img src={story.imageUrl} alt="" className="mb-2 h-auto w-full border-2 border-black object-cover" loading="lazy" />
+                  <img src={story.imageUrl} alt="" className="mb-2 h-auto w-full border-2 border-black object-cover grayscale contrast-125" loading="lazy" />
                 ) : null}
                 {story.headline}
               </a>
@@ -88,7 +88,7 @@ export default async function Home() {
               {activeRightStories.map((story) => (
                 <a key={story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className="block border-b-2 border-black pb-3 underline decoration-2 hover:bg-red-700 hover:text-white">
                   {story.imageUrl && !story.imageHidden ? (
-                    <img src={story.imageUrl} alt="" className="mb-2 h-auto w-full object-cover" loading="lazy" />
+                    <img src={story.imageUrl} alt="" className="mb-2 h-auto w-full border-2 border-black object-cover grayscale contrast-125" loading="lazy" />
                   ) : null}
                   {story.headline}
                 </a>
