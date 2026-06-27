@@ -117,7 +117,7 @@ export default async function Home() {
               {activeChaosStories.filter((_, i) => i % 4 === col).map((story) => (
                 <a key={story._id || story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${story.featured ? "text-3xl" : "text-lg"} block font-black uppercase leading-tight underline decoration-2 hover:bg-red-700 hover:text-white`}>
                   {story.imageUrl && !story.imageHidden ? (
-                    <img src={story.imageUrl} alt="" className="mb-2 h-32 w-full object-cover object-[center_20%]" loading="lazy" />
+                    <img src={story.imageUrl} alt="" className="mb-2 h-32 w-full object-cover object-[center_20%] grayscale contrast-125" loading="lazy" />
                   ) : null}
                   {story.headline}
                 </a>
