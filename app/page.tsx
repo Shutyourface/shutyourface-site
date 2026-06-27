@@ -30,7 +30,7 @@ export default async function Home() {
     <main id="top" className="min-h-screen bg-white text-black">
       <Header />
       <div className="mx-auto max-w-[1500px] px-3 py-4">
-        <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1.6fr)_360px]">
+        <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)_320px]">
           <section className="space-y-3 text-lg font-black uppercase leading-tight">
             {activeLeftLinks.map((story, index) => (
               <a key={story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${index === 0 ? "text-red-700" : ""} block underline decoration-2 hover:bg-red-700 hover:text-white`}>
