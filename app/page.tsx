@@ -32,7 +32,7 @@ export default async function Home() {
       <div className="mx-auto max-w-[1500px] px-3 py-4">
         {showHistoryToggle && (
           <div className="mb-5 flex justify-center">
-            <div className="flex w-3/4 max-w-[860px] gap-1">
+            <div className="flex w-3/4 max-w-[860px] gap-1 mr-[80px]">
             <span className="flex flex-1 items-center justify-center border-2 border-black bg-black py-2 text-center font-tabloid text-xl uppercase text-white">
               Today&apos;s News
             </span>
