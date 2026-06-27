@@ -30,21 +30,6 @@ export default async function Home() {
     <main id="top" className="min-h-screen bg-white text-black">
       <Header />
       <div className="mx-auto max-w-[1500px] px-3 py-4">
-        {showHistoryToggle && (
-          <div className="mb-5 flex justify-center">
-            <div className="flex w-3/4 max-w-[860px] gap-1">
-            <span className="flex flex-1 items-center justify-center border-2 border-black bg-black py-2 text-center font-tabloid text-xl uppercase text-white">
-              Today&apos;s News
-            </span>
-            <a href={`/history/${todayDate}`} className="flex flex-1 items-center justify-center gap-2 border-2 border-red-700 bg-red-700 py-2 font-tabloid text-xl uppercase text-white hover:bg-red-800">
-              <span>⏱</span>
-              <span>On This Day: {toggleDateLabel}</span>
-              <span className="bg-yellow-400 px-1.5 py-0.5 font-mono text-xs font-black text-black">NEW</span>
-              <span>→</span>
-            </a>
-            </div>
-          </div>
-        )}
         <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1.6fr)_280px]">
           <section className="space-y-3 text-lg font-black uppercase leading-tight">
             {activeLeftLinks.map((story, index) => (
@@ -57,6 +42,19 @@ export default async function Home() {
             ))}
           </section>
           <section className="text-center">
+            {showHistoryToggle && (
+              <div className="-mx-3 mb-4 flex gap-1">
+                <span className="flex flex-1 items-center justify-center border-2 border-black bg-black py-2 font-tabloid text-xl uppercase text-white">
+                  Today&apos;s News
+                </span>
+                <a href={`/history/${todayDate}`} className="flex flex-1 items-center justify-center gap-2 border-2 border-red-700 bg-red-700 py-2 font-tabloid text-xl uppercase text-white hover:bg-red-800">
+                  <span>⏱</span>
+                  <span>On This Day: {toggleDateLabel}</span>
+                  <span className="bg-yellow-400 px-1.5 py-0.5 font-mono text-xs font-black text-black">NEW</span>
+                  <span>→</span>
+                </a>
+              </div>
+            )}
             {activeMainStory ? (
               <>
                 {activeMainStory.imageUrl && !activeMainStory.imageHidden ? (
