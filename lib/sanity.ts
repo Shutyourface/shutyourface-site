@@ -163,8 +163,12 @@ export async function hasHistoryPage(date: string): Promise<boolean> {
 }
 
 export function getTodayHistoryDate(): string {
-  const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const month = parts.find((p) => p.type === "month")?.value ?? "01";
+  const day = parts.find((p) => p.type === "day")?.value ?? "01";
   return `${month}-${day}`;
 }
