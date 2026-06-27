@@ -25,7 +25,8 @@ export default async function Home() {
       <Header />
       <div className="mx-auto max-w-[1500px] px-3 py-4">
         {showHistoryToggle && (
-          <div className="mb-5 flex w-full gap-2">
+          <div className="mb-5 flex justify-center">
+          <div className="flex w-full max-w-[900px] gap-2">
             <span className="flex flex-1 items-center justify-center border-2 border-black bg-black py-3 text-center font-tabloid text-2xl uppercase text-white">
               Today&apos;s News
             </span>
@@ -35,6 +36,7 @@ export default async function Home() {
               <span className="bg-yellow-400 px-1.5 py-0.5 font-mono text-xs font-black text-black">NEW</span>
               <span>→</span>
             </a>
+          </div>
           </div>
         )}
         <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1.6fr)_360px]">
