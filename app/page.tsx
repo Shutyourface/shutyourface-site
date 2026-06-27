@@ -43,7 +43,7 @@ export default async function Home() {
           </section>
           <section className="text-center">
             {showHistoryToggle && (
-              <div className="-mx-3 mb-4 flex gap-1">
+              <div className="mb-4 flex gap-1">
                 <span className="flex flex-1 items-center justify-center border-2 border-black bg-black py-2 font-tabloid text-xl uppercase text-white">
                   Today&apos;s News
                 </span>
