@@ -23,27 +23,41 @@ export async function POST(req: NextRequest) {
 
   const prompt = `You are a history curator for ShutYourFace.com, a Drudge Report-style news aggregator with a bold tabloid voice.
 
-Use your web search to look up "${monthName} ${dayNum}" on these specific sites: onthisday.com, history.com, britannica.com, thefactsite.com, and thisdaytrivia.com. Pull events from those results to build your list. Generate 25-30 of the most notable and recognizable historical events that occurred on ${monthName} ${dayNum} across history.
+Use your web search to look up "On This Day ${monthName} ${dayNum}" on onthisday.com, history.com, britannica.com, thefactsite.com, and thisdaytrivia.com. Pull events from those results.
 
-PRIORITIZE:
-- Events from 1850 onward (modern era — readers connect with these more)
-- Events involving well-known people, places, or institutions readers would recognize
-- Dramatic moments: assassinations, disasters, scandals, war milestones, cultural firsts
-- Wild/weird stories with strong narrative hooks
-- Pop culture milestones: famous album releases, movie premieres, sports records, celebrity births/deaths
+Generate 25-30 events that occurred on ${monthName} ${dayNum}. The target reader is an American who watches the news, loves pop culture, and remembers major moments from the last 100 years.
 
-AVOID:
-- Obscure medieval events readers won't recognize
-- Minor political appointments, routine treaty signings
-- Anything before 1700 unless it's a genuinely famous event (Columbus, major battles, founding moments)
-- Generic "a king was born" or "a duke died" entries
+WANT MORE OF THIS:
+- Celebrity deaths, scandals, arrests, feuds (Jayne Mansfield killed, Mike Tyson bites Holyfield's ear)
+- Iconic movie/album/TV premieres readers actually know (Grease released, Thriller drops, Star Wars opens)
+- Sports moments everyone remembers (Ali vs Frazier, Miracle on Ice, O.J. chase)
+- Famous crimes, murders, trials (Manson, JFK, BTK, Columbine)
+- Inventions and tech milestones everyone knows (iPhone announced, moon landing, first TV broadcast)
+- Wars: D-Day, Pearl Harbor, 9/11, Vietnam milestones — major turning points only
+- Presidential moments: inaugurations, assassinations, scandals (Watergate, Monica, Jan 6)
+- Disasters everyone's heard of (Titanic, Hindenburg, Chernobyl, Katrina)
+- Wild/weird/shocking stories with strong narrative hooks
+- Famous births of icons readers know by first name
+
+KEEP FROM THE 1800s ONLY:
+- Presidents, wars, inventions that shaped modern America
+- Events every American learned in school (Lincoln shot, Civil War battles, Gold Rush)
+- Skip everything else from the 1800s
+
+HARD AVOID:
+- Anything before 1800 unless it's Columbus, a founding father, or a world-famous battle
+- Obscure kings, dukes, bishops, minor nobles
+- Treaty signings no one has heard of
+- "A parliament was formed in [obscure country]"
+- Routine political appointments
+- Academic/scientific events no general reader would recognize
 
 For each event return an object with these exact keys:
 - "year": number
-- "description": string (2-3 sentence factual account of what happened)
-- "headline": string (ALL CAPS Drudge/tabloid style, punchy and provocative, must end with "...")
-- "blurb": string (exactly two sentences written to hook a reader — vivid, dramatic, makes them want to click)
-- "sourceUrl": string (a real specific Wikipedia article URL for this event)
+- "description": string (2-3 sentence factual account)
+- "headline": string (ALL CAPS Drudge/tabloid style, punchy, must end with "...")
+- "blurb": string (two sentences to hook a reader — vivid, dramatic, makes them want to click)
+- "sourceUrl": string (specific Wikipedia article URL)
 
 Return ONLY a valid JSON array. No markdown fences, no commentary, no wrapper text.`;
 
