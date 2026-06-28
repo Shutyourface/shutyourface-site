@@ -517,7 +517,6 @@
     <span class="config-label">Date</span>
     <input type="date" class="history-date-input" id="history-date" />
     <button class="btn btn-primary" onclick="fetchHistoryEvents()">🗓 FETCH ON THIS DAY</button>
-    <button class="btn btn-green" id="batch-rewrite-btn" onclick="batchRewriteHistory()" disabled>✦ AI REWRITE ALL</button>
     <span id="history-status" style="font-size:11px;color:var(--muted);letter-spacing:1px;"></span>
   </div>
   <div id="history-feed" class="history-feed">
@@ -778,46 +777,48 @@ function switchTab(tab) {
   }
 }
 
-// ── WIKIPEDIA FETCH ──
+// ── CLAUDE HISTORY FETCH ──
 async function fetchHistoryEvents() {
   const dateValue = document.getElementById('history-date').value;
   if (!dateValue) { showToast('SELECT A DATE FIRST', true); return; }
+  if (!config.claudeKey) { showToast('ADD CLAUDE API KEY IN SETTINGS FIRST', true); return; }
 
   const parts = dateValue.split('-');
-  const month = parseInt(parts[1], 10);
-  const day = parseInt(parts[2], 10);
+  const month = parts[1];
+  const day = parts[2];
 
   document.getElementById('history-feed').innerHTML = `
     <div class="loading-state" style="grid-column:1/-1;">
       <div class="loading-spinner"></div>
-      <div style="font-size:12px;letter-spacing:2px;">LOADING FROM WIKIPEDIA...</div>
+      <div style="font-size:12px;letter-spacing:2px;">ASKING CLAUDE FOR HISTORY...</div>
     </div>`;
-  document.getElementById('history-status').textContent = 'Loading...';
+  document.getElementById('history-status').textContent = 'Generating...';
 
   try {
-    const res = await fetch(
-      `https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/${month}/${day}`,
-      { headers: { 'Accept': 'application/json' } }
-    );
-    if (!res.ok) throw new Error(`Wikipedia returned ${res.status}`);
+    const res = await fetch('/api/history-claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: config.claudeKey, month, day }),
+    });
 
     const data = await res.json();
-    const events = (data.events || []).sort((a, b) => b.year - a.year);
+    if (!res.ok) throw new Error(data.error || 'Claude request failed');
+
+    const events = data.events || [];
 
     historyEvents = events.map(event => ({
       year: event.year,
-      originalText: event.text || '',
-      imageUrl: event.pages?.[0]?.thumbnail?.source || '',
-      link: event.pages?.[0]?.content_urls?.desktop?.page || '',
-      headline: '',
+      originalText: event.description || '',
+      headline: event.headline || '',
+      blurb: event.blurb || '',
+      sourceUrl: event.sourceUrl || '',
       featureOnHomepage: false,
       published: false,
     }));
 
     renderHistoryCards();
-    document.getElementById('history-status').textContent = `${historyEvents.length} events loaded`;
-    document.getElementById('batch-rewrite-btn').disabled = !config.claudeKey || historyEvents.length === 0;
-    showToast(`${historyEvents.length} EVENTS LOADED`);
+    document.getElementById('history-status').textContent = `${historyEvents.length} events generated — review and publish`;
+    showToast(`✦ ${historyEvents.length} EVENTS GENERATED`);
   } catch (e) {
     document.getElementById('history-feed').innerHTML = `
       <div class="history-empty">
@@ -827,48 +828,6 @@ async function fetchHistoryEvents() {
     document.getElementById('history-status').textContent = 'Failed';
     showToast(`FAILED: ${e.message}`, true);
   }
-}
-
-// ── BATCH AI REWRITE ──
-async function batchRewriteHistory() {
-  if (!config.claudeKey) { showToast('ADD CLAUDE KEY FIRST', true); return; }
-  if (!historyEvents.length) { showToast('FETCH EVENTS FIRST', true); return; }
-
-  const btn = document.getElementById('batch-rewrite-btn');
-  btn.textContent = 'REWRITING...';
-  btn.disabled = true;
-  document.getElementById('history-status').textContent = `Generating ${historyEvents.length} headlines...`;
-
-  try {
-    const res = await fetch('/api/rewrite-batch', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        apiKey: config.claudeKey,
-        events: historyEvents.map((e, i) => ({ text: e.originalText, year: e.year, index: i })),
-      }),
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Batch rewrite failed');
-
-    const headlines = data.headlines || [];
-    headlines.forEach((headline, i) => {
-      if (historyEvents[i]) {
-        historyEvents[i].headline = headline;
-        const input = document.getElementById(`hheadline-${i}`);
-        if (input) input.value = headline;
-      }
-    });
-
-    document.getElementById('history-status').textContent = `${headlines.length} headlines ready — review and publish`;
-    showToast(`✦ ${headlines.length} HEADLINES GENERATED`);
-  } catch (e) {
-    showToast(`REWRITE FAILED: ${e.message}`, true);
-  }
-
-  btn.textContent = '✦ AI REWRITE ALL';
-  btn.disabled = false;
 }
 
 // ── RENDER HISTORY CARDS ──
@@ -881,9 +840,10 @@ function renderHistoryCards() {
   feed.innerHTML = historyEvents.map((event, i) => `
     <div class="history-card ${event.published ? 'h-published' : ''}" id="hcard-${i}">
       <div class="hcard-year">${event.year}</div>
-      ${event.imageUrl ? `<img class="hcard-image" src="${escapeAttr(event.imageUrl)}" alt="" loading="lazy" onerror="this.style.display='none'" />` : ''}
       <div class="hcard-original">${escapeHtml(event.originalText)}</div>
-      <input class="hcard-headline-input" id="hheadline-${i}" placeholder="AI headline will appear here after rewrite..." value="${escapeAttr(event.headline)}" />
+      ${event.blurb ? `<div style="font-size:11px;color:#aaa;line-height:1.5;margin:4px 0 6px;">${escapeHtml(event.blurb)}</div>` : ''}
+      ${event.sourceUrl ? `<a href="${escapeAttr(event.sourceUrl)}" target="_blank" rel="noopener" style="font-size:10px;color:#4a9eff;letter-spacing:1px;text-decoration:underline;">VIEW SOURCE →</a>` : ''}
+      <input class="hcard-headline-input" id="hheadline-${i}" placeholder="Headline..." value="${escapeAttr(event.headline)}" />
       <label class="hcard-feature">
         <input type="checkbox" id="hfeature-${i}" onchange="historyEvents[${i}].featureOnHomepage = this.checked" ${event.featureOnHomepage ? 'checked' : ''} />
         Feature on Homepage
@@ -907,7 +867,7 @@ async function publishHistoryStory(index, placement) {
   if (!event) return;
 
   const headline = document.getElementById(`hheadline-${index}`).value.trim();
-  if (!headline) { showToast('ADD A HEADLINE FIRST (click AI REWRITE ALL)', true); return; }
+  if (!headline) { showToast('HEADLINE IS EMPTY', true); return; }
 
   const featureOnHomepage = document.getElementById(`hfeature-${index}`).checked;
   const dateValue = document.getElementById('history-date').value; // YYYY-MM-DD
@@ -919,9 +879,9 @@ async function publishHistoryStory(index, placement) {
     _id: stableId,
     historyDate: historyDate,
     headline: headline,
-    url: event.link || '',
-    imageUrl: event.imageUrl || '',
-    imageHidden: !event.imageUrl,
+    url: event.sourceUrl || '',
+    imageUrl: '',
+    imageHidden: true,
     year: event.year,
     originalEvent: event.originalText,
     placement: placement,
