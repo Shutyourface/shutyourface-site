@@ -59,7 +59,7 @@ export default async function HistoryPage({ params }: { params: { date: string }
         ) : (
           <>
             {/* 3-column grid */}
-            <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1.6fr)_360px]">
+            <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)_320px]">
 
               {/* Left column */}
               <section className="space-y-3 text-lg font-black uppercase leading-tight">
