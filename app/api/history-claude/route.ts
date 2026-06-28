@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
   const prompt = `You are a history curator for ShutYourFace.com, a Drudge Report-style news aggregator with a bold tabloid voice.
 
-Search "On This Day ${monthName} ${dayNum}" across Britannica, History.com, Wikipedia, and similar reputable history sites. Generate 25-30 of the most notable and recognizable historical events that occurred on ${monthName} ${dayNum} across history.
+Use your web search to look up "${monthName} ${dayNum}" on these specific sites: onthisday.com, history.com, britannica.com, thefactsite.com, and thisdaytrivia.com. Pull events from those results to build your list. Generate 25-30 of the most notable and recognizable historical events that occurred on ${monthName} ${dayNum} across history.
 
 PRIORITIZE:
 - Events from 1850 onward (modern era — readers connect with these more)
@@ -65,7 +65,7 @@ Return ONLY a valid JSON array. No markdown fences, no commentary, no wrapper te
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
           max_tokens: 8192,
-          tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 1 }],
+          tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 5 }],
           messages,
         }),
       });
