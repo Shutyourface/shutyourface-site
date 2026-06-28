@@ -1,15 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-
-type ContentBlock = { type: string; text?: string; id?: string; name?: string; input?: unknown };
-type Message = { role: string; content: ContentBlock[] | string };
-type ApiResponse = {
-  content?: ContentBlock[];
-  stop_reason?: string;
-  error?: { message: string };
-};
-
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { month, day } = body as { month: string; day: string };
@@ -18,116 +8,83 @@ export async function POST(req: NextRequest) {
   if (!apiKey) return NextResponse.json({ error: "Missing API key" }, { status: 401 });
   if (!month || !day) return NextResponse.json({ error: "Missing month or day" }, { status: 400 });
 
-  const monthName = MONTH_NAMES[parseInt(month, 10) - 1];
-  const dayNum = parseInt(day, 10);
+  // Step 1: Fetch raw events from Wikipedia (free, no AI cost)
+  const wikiRes = await fetch(
+    `https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/${parseInt(month, 10)}/${parseInt(day, 10)}`,
+    { headers: { "Accept": "application/json" } }
+  );
+  if (!wikiRes.ok) return NextResponse.json({ error: `Wikipedia fetch failed: ${wikiRes.status}` }, { status: 502 });
 
-  const prompt = `You are a history curator for ShutYourFace.com, a Drudge Report-style news aggregator with a bold tabloid voice.
+  const wikiData = await wikiRes.json() as { events?: Array<{ year: number; text: string; pages?: Array<{ content_urls?: { desktop?: { page?: string } } }> }> };
+  const rawEvents = (wikiData.events || []).map(e => ({
+    year: e.year,
+    text: e.text,
+    url: e.pages?.[0]?.content_urls?.desktop?.page || "",
+  }));
 
-Use your web search to look up "On This Day ${monthName} ${dayNum}" on onthisday.com, history.com, britannica.com, thefactsite.com, and thisdaytrivia.com. Pull events from those results.
+  if (!rawEvents.length) return NextResponse.json({ error: "No Wikipedia events found for this date" }, { status: 404 });
 
-Generate 25-30 events that occurred on ${monthName} ${dayNum}. The target reader is an American who watches the news, loves pop culture, and remembers major moments from the last 100 years.
+  // Step 2: Send to Claude to pick the best 15 and rewrite in SYF voice
+  const eventList = rawEvents.map((e, i) => `${i + 1}. [${e.year}] ${e.text}`).join("\n");
 
-WANT MORE OF THIS:
-- Celebrity deaths, scandals, arrests, feuds (Jayne Mansfield killed, Mike Tyson bites Holyfield's ear)
-- Iconic movie/album/TV premieres readers actually know (Grease released, Thriller drops, Star Wars opens)
-- Sports moments everyone remembers (Ali vs Frazier, Miracle on Ice, O.J. chase)
-- Famous crimes, murders, trials (Manson, JFK, BTK, Columbine)
-- Inventions and tech milestones everyone knows (iPhone announced, moon landing, first TV broadcast)
-- Wars: D-Day, Pearl Harbor, 9/11, Vietnam milestones — major turning points only
-- Presidential moments: inaugurations, assassinations, scandals (Watergate, Monica, Jan 6)
-- Disasters everyone's heard of (Titanic, Hindenburg, Chernobyl, Katrina)
+  const prompt = `You are a tabloid editor for ShutYourFace.com, a Drudge Report-style news aggregator.
+
+Below is Wikipedia's full list of historical events for this date. Your job: pick the 15 most compelling and rewrite them in SYF voice.
+
+PICK events about:
+- Celebrity deaths, scandals, arrests (the more shocking the better)
+- Iconic movies, albums, TV shows everyone knows
+- Sports moments people talk about forever (Tyson biting ear, miracle on ice, etc.)
+- Famous crimes, murders, trials
+- Wars, battles, major turning points
+- Inventions and tech milestones everyone knows (moon landing, iPhone, first TV)
+- Presidential moments: assassinations, inaugurations, scandals
+- Disasters everyone's heard of (Titanic, Hindenburg, Chernobyl)
 - Wild/weird/shocking stories with strong narrative hooks
-- Famous births of icons readers know by first name
 
-KEEP FROM THE 1800s ONLY:
-- Presidents, wars, inventions that shaped modern America
-- Events every American learned in school (Lincoln shot, Civil War battles, Gold Rush)
-- Skip everything else from the 1800s
+SKIP:
+- Obscure political appointments, minor treaty signings
+- Events involving people or places no general reader would recognize
+- Anything dry or academic
 
-HARD AVOID:
-- Anything before 1800 unless it's Columbus, a founding father, or a world-famous battle
-- Obscure kings, dukes, bishops, minor nobles
-- Treaty signings no one has heard of
-- "A parliament was formed in [obscure country]"
-- Routine political appointments
-- Academic/scientific events no general reader would recognize
+WIKIPEDIA EVENTS:
+${eventList}
 
-For each event return an object with these exact keys:
-- "year": number
+Return a JSON array of exactly 15 objects with these keys:
+- "year": number (from the Wikipedia entry)
 - "description": string (2-3 sentence factual account)
 - "headline": string (ALL CAPS Drudge/tabloid style, punchy, must end with "...")
-- "blurb": string (two sentences to hook a reader — vivid, dramatic, makes them want to click)
-- "sourceUrl": string (specific Wikipedia article URL)
+- "blurb": string (two vivid sentences that make a reader want to click)
+- "sourceUrl": string (use the Wikipedia URL if provided, otherwise construct one: https://en.wikipedia.org/wiki/[Topic])
 
-Return ONLY a valid JSON array. No markdown fences, no commentary, no wrapper text.`;
+Return ONLY a valid JSON array. No markdown, no commentary.`;
 
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 4096,
+      messages: [{ role: "user", content: prompt }],
+    }),
+  });
+
+  const data = await res.json() as { content?: Array<{ type: string; text?: string }>; error?: { message: string } };
+  if (!res.ok) return NextResponse.json({ error: data.error?.message || "Claude API error" }, { status: res.status });
+
+  const raw = data.content?.find(b => b.type === "text")?.text ?? "[]";
+  const cleaned = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/, "").trim();
+
+  let events: unknown[];
   try {
-    const messages: Message[] = [{ role: "user", content: prompt }];
-    let finalText = "";
-    let iterations = 0;
-
-    while (iterations < 8) {
-      iterations++;
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "anthropic-beta": "web-search-2025-03-05",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 8192,
-          tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 5 }],
-          messages,
-        }),
-      });
-
-      const data = await res.json() as ApiResponse;
-      if (!res.ok) return NextResponse.json({ error: data.error?.message || "Claude API error" }, { status: res.status });
-
-      const content = data.content || [];
-
-      // Collect any text blocks
-      const textBlocks = content.filter(b => b.type === "text" && b.text);
-      if (textBlocks.length > 0) {
-        finalText = textBlocks.map(b => b.text ?? "").join("");
-      }
-
-      if (data.stop_reason === "end_turn") break;
-
-      if (data.stop_reason === "tool_use") {
-        // Add assistant turn
-        messages.push({ role: "assistant", content });
-        // Return empty tool_result for each tool_use block so Claude can continue
-        const toolUses = content.filter(b => b.type === "tool_use" && b.id);
-        messages.push({
-          role: "user",
-          content: toolUses.map(b => ({
-            type: "tool_result",
-            tool_use_id: b.id,
-            content: "",
-          })) as unknown as ContentBlock[],
-        });
-      } else {
-        break;
-      }
-    }
-
-    if (!finalText) return NextResponse.json({ error: "No response from Claude" }, { status: 500 });
-
-    const cleaned = finalText.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/, "").trim();
-    let events: unknown[];
-    try {
-      events = JSON.parse(cleaned);
-    } catch {
-      return NextResponse.json({ error: "Claude returned invalid JSON", raw: finalText }, { status: 500 });
-    }
-
-    return NextResponse.json({ events });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "Unknown error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    events = JSON.parse(cleaned);
+  } catch {
+    return NextResponse.json({ error: "Claude returned invalid JSON", raw }, { status: 500 });
   }
+
+  return NextResponse.json({ events });
 }
