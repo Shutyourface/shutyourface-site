@@ -73,12 +73,14 @@ export function distributeToColumns(stories: DisplayStory[], columnCount: number
 
 export function distributeToColumnsBalanced(stories: DisplayStory[], columnCount: number): DisplayStory[][] {
   const columns: DisplayStory[][] = Array.from({ length: columnCount }, () => []);
+  const heights = Array(columnCount).fill(0);
 
   for (const story of stories) {
-    // Find the shortest column
-    const shortestIndex = columns.reduce((minIdx, col, i) =>
-      col.length < columns[minIdx].length ? i : minIdx, 0);
+    // Estimate card height: image stories are taller (~200px) vs text-only (~80px)
+    const cardHeight = story.imageUrl && !story.imageHidden ? 200 : 80;
+    const shortestIndex = heights.reduce((minIdx, h, i) => h < heights[minIdx] ? i : minIdx, 0);
     columns[shortestIndex].push(story);
+    heights[shortestIndex] += cardHeight;
   }
 
   return columns;
