@@ -73,44 +73,26 @@ export function distributeToColumns(stories: DisplayStory[], columnCount: number
 
 export function distributeToColumnsBalanced(stories: DisplayStory[], columnCount: number): DisplayStory[][] {
   const columns: DisplayStory[][] = Array.from({ length: columnCount }, () => []);
-  const imagesPerRow: Record<number, number> = {};
   const imagesPerCol = Array(columnCount).fill(0);
-  const MAX_IMAGES_PER_ROW = 2;
-  const MAX_IMAGES_PER_COL = 2;
+  const colIndices = Array.from({ length: columnCount }, (_, i) => i);
 
   for (const story of stories) {
     const hasImage = !!story.imageUrl && !story.imageHidden;
 
-    // Sort by column length (shortest first)
-    const byLength = Array.from({ length: columnCount }, (_, i) => i)
-      .sort((a, b) => columns[a].length - columns[b].length);
-
-    let placed = false;
-    for (const col of byLength) {
-      const rowNum = columns[col].length;
-      const rowImages = imagesPerRow[rowNum] ?? 0;
-      const colImages = imagesPerCol[col];
-      if (!hasImage || (rowImages < MAX_IMAGES_PER_ROW && colImages < MAX_IMAGES_PER_COL)) {
-        columns[col].push(story);
-        if (hasImage) {
-          imagesPerRow[rowNum] = rowImages + 1;
-          imagesPerCol[col]++;
-        }
-        placed = true;
-        break;
-      }
+    let col: number;
+    if (hasImage) {
+      // Image stories: pick column with fewest images; tiebreak by shortest length
+      col = colIndices.slice().sort((a, b) => {
+        if (imagesPerCol[a] !== imagesPerCol[b]) return imagesPerCol[a] - imagesPerCol[b];
+        return columns[a].length - columns[b].length;
+      })[0];
+      imagesPerCol[col]++;
+    } else {
+      // Text stories: pick shortest column
+      col = colIndices.slice().sort((a, b) => columns[a].length - columns[b].length)[0];
     }
 
-    if (!placed) {
-      // Fallback: shortest column regardless of caps
-      const shortest = byLength[0];
-      const rowNum = columns[shortest].length;
-      columns[shortest].push(story);
-      if (hasImage) {
-        imagesPerRow[rowNum] = (imagesPerRow[rowNum] ?? 0) + 1;
-        imagesPerCol[shortest]++;
-      }
-    }
+    columns[col].push(story);
   }
 
   return columns;
