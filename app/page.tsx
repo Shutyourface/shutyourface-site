@@ -14,7 +14,7 @@ export default async function Home() {
     day: "numeric",
   }).format(new Date()).toUpperCase();
   const [cmsStories, settings] = await Promise.all([getCmsStories(), getSiteSettings()]);
-  const { activeMainStory, activeHero2Story, activeLeftLinks, activeRightStories, activeChaosStories, moreFaceStories } = buildStoryLayout(cmsStories);
+  const { activeMainStory, activeHero2Story, activeLeftLinks, activeRightStories, activeChaosStories, activeChaosColumns, moreFaceStories } = buildStoryLayout(cmsStories);
 
   let historyExists = false;
   let featuredHistoryStory = null;
@@ -112,9 +112,9 @@ export default async function Home() {
           </a>
         )}
         <section className="mt-5 grid grid-cols-4 items-start gap-5">
-          {[0, 1, 2, 3].map((col) => (
-            <div key={col} className="flex flex-col gap-5">
-              {activeChaosStories.filter((_, i) => i % 4 === col).map((story) => (
+          {activeChaosColumns.map((col, colIdx) => (
+            <div key={colIdx} className="flex flex-col gap-5">
+              {col.map((story) => (
                 <a key={story._id || story.headline} href={story.url || "#"} {...externalLinkProps(story.url)} className={`${story.featured ? "text-3xl" : "text-lg"} block font-black uppercase leading-tight underline decoration-2 hover:bg-red-700 hover:text-white`}>
                   {story.imageUrl && !story.imageHidden ? (
                     <img src={story.imageUrl} alt="" className="mb-2 h-40 w-full object-cover object-[center_20%] grayscale contrast-125" loading="lazy" />
